@@ -19,6 +19,9 @@ class ClassRuntime:
         self.lesson, self.provider = lesson, provider
         self.ccs, self.bkt, self.nudges = CCSEngine(), BKTTracker(memory=memory), NudgeEngine(provider)
         self.sentiments = deque(maxlen=5); self.latencies = deque(maxlen=5); self.quotes = deque(maxlen=5)
+        self.sentiment_events = deque(maxlen=20); self.keyword_events = deque(maxlen=20)
+        self.latency_events = deque(maxlen=20); self.poll_events = deque(maxlen=40)
+        self.student_ids = deque(maxlen=20)
         self.keyword_flags = 0; self.poll_correct = []
         self.event_queue: asyncio.Queue = asyncio.Queue()
         self.processed_sources: list[str] = []
@@ -30,7 +33,14 @@ class ClassRuntime:
         self.status = "created"
 
     def _window(self) -> SignalWindow:
-        return SignalWindow(list(self.sentiments), self.keyword_flags, list(self.latencies), self.poll_correct[-8:], list(self.quotes))
+        return SignalWindow(
+            sentiments=list(self.sentiments), keyword_flags=self.keyword_flags,
+            response_latencies=list(self.latencies), poll_correct=self.poll_correct[-8:],
+            student_quotes=list(self.quotes), student_ids=list(self.student_ids),
+            active_students=len(self.lesson.students), current_at=self.current_at,
+            sentiment_events=list(self.sentiment_events), keyword_events=list(self.keyword_events),
+            latency_events=list(self.latency_events), poll_events=list(self.poll_events),
+        )
 
     def submit_live_event(self, student_id: str, text: str, timestamp: str) -> dict:
         student_id, text = student_id.strip(), text.strip()
@@ -54,13 +64,20 @@ class ClassRuntime:
         yield {"kind": "event", "data": event}
         if event["type"] in ("teacher", "chat"):
             sentiment = self.provider.classify_sentiment(event["text"])
+            event["learning_state"] = sentiment.model_dump()
         if event["type"] == "chat":
-            self.sentiments.append((sentiment.sentiment, sentiment.confidence))
-            self.latencies.append(float(event.get("latency_seconds", 0)))
-            self.keyword_flags += self.ccs.keyword_count(event["text"])
+            effective_label = "confused" if sentiment.confusion_probability >= .5 else sentiment.sentiment
+            self.sentiments.append((effective_label, sentiment.confusion_probability))
+            self.sentiment_events.append((effective_label, sentiment.confusion_probability, self.current_at, event.get("speaker", "")))
+            latency = float(event.get("latency_seconds", 0)); self.latencies.append(latency)
+            self.latency_events.append((latency, self.current_at))
+            keyword_count = self.ccs.keyword_count(event["text"]); self.keyword_flags += keyword_count
+            self.keyword_events.append((keyword_count, self.current_at))
+            self.student_ids.append(event.get("speaker", ""))
             self.quotes.append(event["text"])
         elif event["type"] == "poll":
             answers = list(event["responses"].values()); self.poll_correct.extend(answers)
+            self.poll_events.extend((answer, self.current_at) for answer in answers)
             for student, correct in event["responses"].items():
                 self.bkt.update_mastery(student, self.lesson.concept, correct=correct, ccs=None)
         result = self.ccs.score(self._window())

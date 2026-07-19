@@ -9,8 +9,15 @@ from pydantic import BaseModel, Field
 
 SENTIMENT_SCHEMA = {
     "type": "object", "additionalProperties": False,
-    "properties": {"sentiment": {"type": "string", "enum": ["confused", "neutral", "positive"]}, "confidence": {"type": "number", "minimum": 0, "maximum": 1}},
-    "required": ["sentiment", "confidence"],
+    "properties": {
+        "sentiment": {"type": "string", "enum": ["confused", "neutral", "positive"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "confusion_probability": {"type": "number", "minimum": 0, "maximum": 1},
+        "misconception": {"type": "string"},
+        "question_type": {"type": "string", "enum": ["none", "clarification", "verification", "misconception"]},
+        "evidence_strength": {"type": "number", "minimum": 0, "maximum": 1},
+    },
+    "required": ["sentiment", "confidence", "confusion_probability", "misconception", "question_type", "evidence_strength"],
 }
 NUDGE_SCHEMA = {
     "type": "object", "additionalProperties": False,
@@ -22,6 +29,10 @@ NUDGE_SCHEMA = {
 class SentimentResult(BaseModel):
     sentiment: Literal["confused", "neutral", "positive"]
     confidence: float = Field(ge=0, le=1)
+    confusion_probability: float = Field(ge=0, le=1)
+    misconception: str
+    question_type: Literal["none", "clarification", "verification", "misconception"]
+    evidence_strength: float = Field(ge=0, le=1)
 
 
 class NudgeResult(BaseModel):
@@ -54,7 +65,7 @@ class OpenAIStructuredProvider(StructuredProvider):
         return json.loads(response.output_text)
 
     def classify_sentiment(self, text: str) -> SentimentResult:
-        payload = self._request("Classify only the student's expressed learning state. Return the strict schema.", text, "classroom_sentiment", SENTIMENT_SCHEMA)
+        payload = self._request("Classify the student's expressed learning state. Identify uncertainty, clarification or verification questions, and explicit misconceptions. Probability must reflect confusion rather than general negative sentiment. Return the strict schema.", text, "classroom_sentiment", SENTIMENT_SCHEMA)
         return SentimentResult.model_validate(payload)
 
     def generate_nudge(self, concept: str, evidence: dict) -> NudgeResult:
@@ -69,10 +80,11 @@ class DemoStructuredProvider(StructuredProvider):
     def classify_sentiment(self, text: str) -> SentimentResult:
         lowered = text.lower()
         if any(term in lowered for term in ("confused", "not sure", "don't understand", "doesn't make sense", "lost", "right?")):
-            return SentimentResult(sentiment="confused", confidence=.9)
+            return SentimentResult(sentiment="confused", confidence=.9, confusion_probability=.9, misconception="", question_type="clarification", evidence_strength=.9)
         if any(term in lowered for term in ("understand", "makes sense", "got it", "because")):
-            return SentimentResult(sentiment="positive", confidence=.78)
-        return SentimentResult(sentiment="neutral", confidence=.72)
+            return SentimentResult(sentiment="positive", confidence=.78, confusion_probability=.08, misconception="", question_type="none", evidence_strength=.75)
+        tentative = any(term in lowered for term in ("maybe", "i think", "is it", "would it", "opposite"))
+        return SentimentResult(sentiment="confused" if tentative else "neutral", confidence=.65 if tentative else .72, confusion_probability=.58 if tentative else .15, misconception="", question_type="verification" if tentative else "none", evidence_strength=.6)
 
     def generate_nudge(self, concept: str, evidence: dict) -> NudgeResult:
         frames = {

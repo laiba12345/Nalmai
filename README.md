@@ -28,9 +28,9 @@ py -m pip install -r requirements.txt
 
 1. One of three JSON class fixtures replays teacher speech, student chat, and polls using original relative timestamps.
 2. Every transcript line passes through the typed sentiment-provider boundary.
-3. CCS combines confused sentiment, keyword flags, response latency, and poll-miss rate with a deterministic weighted sigmoid.
+3. CCS combines structured learning-state classification, keyword flags, response latency, unique-student breadth, and poll-miss rate with deterministic weighted sigmoids. Evidence decays with age instead of accumulating forever.
 4. Explicit poll correctness updates BKT strongly. CCS contributes lower-weight soft evidence.
-5. When CCS first crosses `0.60`, the nudge engine calls GPT‑5.6 with strict Structured Outputs. It does not fire again until the score falls below the reset threshold.
+5. A language-only early warning appears at `0.40`; when confirmed CCS first crosses `0.60`, the nudge engine calls GPT‑5.6 with strict Structured Outputs. It does not fire again until the score falls below the reset threshold.
 6. The single dashboard updates through Server-Sent Events without refresh: transcript, CCS gauge/components, nudge, and mastery table.
 7. BKT state is persisted to SQLite after every update. A restarted session begins from the previous ending mastery and shows the change since that prior session.
 8. An optional “Live student” drawer accepts non-scripted chat during replay. Those events enter the same runtime queue and processing function as fixture events and are visibly tagged.
@@ -98,7 +98,7 @@ Run the reproducible authored-fixture backtest with:
 py scripts/backtest_ccs.py
 ```
 
-Current aggregate results are **0.857 precision** and **0.500 recall** against the explicitly annotated confusion windows. Pre-poll CCS predicted **0 of 4** subsequent majority-miss outcomes when only the previous event’s score was used, preventing poll-result leakage. This shows that the current score identifies some in-window confusion but is not an early poll-miss predictor in this tiny authored set. The weights were not retuned after seeing the result.
+Confirmed-alert results remain **0.857 precision** and **0.500 recall**. The new poll-independent early-warning path reaches **0.818 precision**, **0.750 recall**, and predicts **3 of 4** poll outcomes from the previous event without result leakage. These are improvements on three authored fixtures, not proof of generalization; thresholds require validation on educator-labeled held-out lessons.
 
 See [validation/CCS_BACKTEST.md](./validation/CCS_BACKTEST.md) for per-fixture timelines and machine-readable detail. This is fixture behavior validation, not accuracy against real classroom confusion labels.
 

@@ -17,7 +17,7 @@ The Python test suite covers:
 - FastAPI health/catalog endpoints, SSE delivery, static dashboard delivery;
 - presence of the live transcript, CCS gauge, nudge panel, mastery table, and EventSource client.
 
-Final implementation checkpoint: **35 passed, 0 failed** in 2.05 seconds. Ten deprecation warnings originate inside FastAPI under Python 3.14; no ClassPulse warning or failure was emitted. `node --check public/app.js` also passed.
+Final implementation checkpoint after the CCS upgrade: **39 passed, 0 failed**. Ten deprecation warnings originate inside FastAPI under Python 3.14; no ClassPulse warning or failure was emitted. `node --check public/app.js` also passed.
 
 ## Real-data validation
 
@@ -45,7 +45,14 @@ The production CCS path was replayed against explicit confusion windows in all t
 - Confusion matrix: TP 6, FP 1, TN 4, FN 6
 - Pre-poll majority-miss prediction: **0/4**
 
-The pre-poll calculation uses the score from the prior event, so the poll result cannot leak into its own prediction. These results show late/reactive detection rather than reliable early warning. No post-hoc weight tuning was performed. Full timelines are in [validation/CCS_BACKTEST.md](./validation/CCS_BACKTEST.md).
+The separate poll-independent early-warning path produced:
+
+- Early-warning precision: **0.818**
+- Early-warning recall: **0.750**
+- Early-warning confusion matrix: TP 9, FP 2, TN 3, FN 3
+- Pre-poll majority-miss prediction: **3/4**
+
+The pre-poll calculation uses the score from the prior event, so the poll result cannot leak into its own prediction. The early score excludes poll outcomes, while confirmed CCS retains them. Evidence is time-decayed and student breadth is normalized against the active roster. Because this remains a tiny authored set used during development, the result may be overfit and must be replicated on held-out educator labels. Full timelines are in [validation/CCS_BACKTEST.md](./validation/CCS_BACKTEST.md).
 
 ## Real-server smoke test
 
