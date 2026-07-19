@@ -35,3 +35,25 @@ def test_live_input_enters_same_sse_stream_with_visible_tag():
         text = "".join(response.iter_text())
     assert '"live": true' in text
     assert "Live Guest" in text
+
+def test_create_list_and_stream_two_isolated_sessions():
+    first = client.post("/api/sessions", json={"fixture_id": "fractions-live"}).json()
+    second = client.post("/api/sessions", json={"fixture_id": "forces-live"}).json()
+    assert first["session_id"] != second["session_id"]
+    sessions = client.get("/api/sessions").json()
+    assert {first["session_id"], second["session_id"]}.issubset({row["session_id"] for row in sessions})
+    with client.stream("GET", f"/stream/{first['session_id']}?speed=10000") as response:
+        first_stream = "".join(response.iter_text())
+    with client.stream("GET", f"/stream/{second['session_id']}?speed=10000") as response:
+        second_stream = "".join(response.iter_text())
+    assert '"concept": "fractions"' in first_stream
+    assert '"concept": "forces"' in second_stream
+    assert second["session_id"] not in first_stream
+
+
+def test_session_scoped_live_input():
+    created = client.post("/api/sessions", json={"fixture_id": "photosynthesis-live"}).json()
+    response = client.post(f"/api/sessions/{created['session_id']}/live-input", json={"student_id": "Live Bio", "text": "I do not understand", "timestamp": "2026-07-19T11:00:00Z"})
+    assert response.status_code == 202
+    with client.stream("GET", f"/stream/{created['session_id']}?speed=10000") as stream:
+        assert "Live Bio" in "".join(stream.iter_text())

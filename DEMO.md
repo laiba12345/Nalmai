@@ -26,6 +26,8 @@ The poll updates each student explicitly, while CCS supplies weaker soft evidenc
 
 Choose Photosynthesis or Forces. The stream restarts with a different concept and deliberate confusion moment.
 
+Open the dashboard in a second tab and start another scenario. The **Active classes** strip shows both session IDs, concepts, CCS values, and status. Each tab streams only its own transcript and mastery state.
+
 ## Show real-data evidence
 
 Scroll to **Real-data validation**. Show that ClassPulse loads 30,401 official TalkMoves teacher/student utterance pairs and their discourse annotations. Point out the source license and boundary: real classroom language validates ingestion and discourse coverage, while the scripted streams provide known confusion, latency, and poll ground truth.

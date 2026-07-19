@@ -13,10 +13,11 @@ The Python test suite covers:
 - exactly one concept-specific nudge per spike and no calm nudge;
 - complete runtime production of transcript, CCS, mastery, and nudge messages;
 - live student submissions entering the same runtime queue and `process_event` path as scripted events, with SSE/API/UI tagging;
+- concurrent sessions maintaining independent queues, CCS scores, mastery, stream URLs, and lifecycle status;
 - FastAPI health/catalog endpoints, SSE delivery, static dashboard delivery;
 - presence of the live transcript, CCS gauge, nudge panel, mastery table, and EventSource client.
 
-Latest implementation checkpoint after real-data integration: **22 passed, 0 failed** in 0.88 seconds. Five deprecation warnings originate inside FastAPI under Python 3.14; no ClassPulse warning or failure was emitted.
+Final implementation checkpoint: **35 passed, 0 failed** in 2.05 seconds. Ten deprecation warnings originate inside FastAPI under Python 3.14; no ClassPulse warning or failure was emitted. `node --check public/app.js` also passed.
 
 ## Real-data validation
 
@@ -56,6 +57,8 @@ Uvicorn was launched on a real localhost socket and verified independently of Fa
 - `GET /api/stream/fractions-live?speed=10000`: 200
 - SSE contained `event`, `ccs`, `mastery`, `nudge`, and `complete` message types
 - Provider was honestly reported as `deterministic-demo-fallback` because no API credential was supplied
+- two session IDs and stream URLs were unique, both SSE streams completed, and neither stream contained the other session ID
+- live input to a specific session returned `202 Accepted`
 
 ## Interpretation boundaries
 

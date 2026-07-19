@@ -2,7 +2,7 @@
 
 ClassPulse is a focused real-time teaching copilot. It replays a simulated online class, fuses live confusion signals into a Confusion Confidence Score (CCS), updates per-student concept mastery with Bayesian Knowledge Tracing (BKT), and produces one concrete teacher nudge when confusion crosses a threshold.
 
-This repository follows `AGENTS.md` and implements Tasks 1–5 in `TASK_BRIEFS.md`. The broader earlier ClassroomOS simulator is intentionally not part of this scoped build.
+This repository follows `AGENTS.md` and implements Tasks 1–9 in `TASK_BRIEFS.md`. The broader earlier ClassroomOS simulator is intentionally not part of this scoped build.
 
 ## One-command demo
 
@@ -34,6 +34,7 @@ py -m pip install -r requirements.txt
 6. The single dashboard updates through Server-Sent Events without refresh: transcript, CCS gauge/components, nudge, and mastery table.
 7. BKT state is persisted to SQLite after every update. A restarted session begins from the previous ending mastery and shows the change since that prior session.
 8. An optional “Live student” drawer accepts non-scripted chat during replay. Those events enter the same runtime queue and processing function as fixture events and are visibly tagged.
+9. Every replay has its own session ID and isolated CCS, BKT, queue, and nudge state. The active-classes strip exposes simultaneous sessions without mixing their events.
 
 ## GPT‑5.6 configuration
 
@@ -76,6 +77,7 @@ poll correctness ─────────────────────
 - `app/llm.py`: strict schemas, OpenAI Responses adapter, and labeled demo provider.
 - `app/nudges.py`: threshold crossing and once-per-spike suppression.
 - `app/runtime.py`: coherent event-to-CCS-to-BKT-to-nudge loop.
+- `app/sessions.py`: concurrent session registry and per-class runtime isolation.
 - `app/main.py`: FastAPI, SSE endpoint, health/catalog APIs, and static dashboard.
 - `public/`: responsive single-screen live product UI.
 - `data/classes/`: three scripted classes with deliberate confusion moments.
@@ -86,7 +88,7 @@ poll correctness ─────────────────────
 py -m pytest
 ```
 
-The suite verifies event order/timestamps, all three fixtures, calm/confused CCS, sigmoid bounds, BKT correctness and CCS soft-evidence weighting, both strict OpenAI schemas, one nudge per spike, calm suppression, full runtime integration, SSE delivery, APIs, and required dashboard surfaces.
+The suite verifies event order/timestamps, all three fixtures, calm/confused CCS, sigmoid bounds, BKT correctness and CCS soft-evidence weighting, both strict OpenAI schemas, one nudge per spike, calm suppression, full runtime integration, live input, persistence, concurrent-session isolation, SSE delivery, APIs, and required dashboard surfaces.
 
 ## CCS validation
 
@@ -111,7 +113,8 @@ See [validation/CCS_BACKTEST.md](./validation/CCS_BACKTEST.md) for per-fixture t
 | Mastery across restarts | SQLite persistence in `data/classpulse.db` |
 | Browser updates | Real SSE stream |
 | Student chat typed during demo | Real input through the shared runtime queue |
-| Raw audio, database, multiple classes/teachers, memory agent | Out of scope |
+| Concurrent simulated classes | Real isolated runtime sessions |
+| Raw audio, multi-teacher accounts, memory agent | Out of scope |
 
 ## Real classroom data validation
 
@@ -137,6 +140,7 @@ Source: [SumnerLab/TalkMoves](https://github.com/SumnerLab/TalkMoves). Dataset p
 - CCS observes language, latency, and polls, not tone, facial expression, or silence quality.
 - Mastery is an estimate based on current evidence, never a diagnosis or fixed student trait.
 - SQLite persistence is local to this demo instance and has no authentication, roster reconciliation, or school data-retention policy.
+- Concurrent sessions share one local process and SQLite file; this is a demo of state isolation, not a horizontally scalable deployment.
 - Automated tests mock the Responses transport; a live GPT‑5.6 call requires the user’s valid API key and account access.
 - TalkMoves is restricted to attribution, noncommercial use, and share-alike redistribution under its source license.
 
