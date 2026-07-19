@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ClassPulse live classroom confusion intelligence">
+  <title>ClassPulse — Live Teaching Intelligence</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">CP</span><span>Class<span>Pulse</span></span></a>
+    <div class="lesson-meta"><span class="live-dot"></span><div><small>LIVE CLASS</small><strong id="lessonTitle">Preparing lesson…</strong></div></div>
+    <div class="controls"><label>Scenario<select id="lessonSelect" aria-label="Choose scripted class"></select></label><label>Speed<select id="speedSelect" aria-label="Playback speed"><option value="1">1×</option><option value="3" selected>3×</option><option value="8">8×</option></select></label><button id="restartButton">↻ Replay</button></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div><p class="eyebrow">REAL-TIME TEACHING COPILOT</p><h1>See confusion.<br><em>Respond in the moment.</em></h1><p>ClassPulse fuses student language, response latency, and poll outcomes while tracking mastery per learner.</p></div>
+      <div class="provider" id="providerBadge"><i></i><span><small>INTELLIGENCE MODE</small><strong>Connecting…</strong></span></div>
+    </section>
+
+    <section class="stats">
+      <article><span class="stat-icon purple">◌</span><div><small>CURRENT CONCEPT</small><strong id="conceptName">—</strong><p>Live transcript context</p></div></article>
+      <article><span class="stat-icon mint">◎</span><div><small>STUDENTS CONNECTED</small><strong id="studentCount">0</strong><p>Simulated class roster</p></div></article>
+      <article><span class="stat-icon amber">↗</span><div><small>EVENTS PROCESSED</small><strong id="eventCount">0</strong><p>Teacher, chat, and polls</p></div></article>
+      <article><span class="stat-icon coral">!</span><div><small>NUDGES THIS SPIKE</small><strong id="nudgeCount">0</strong><p>Deduplicated alerts</p></div></article>
+    </section>
+
+    <div class="live-grid">
+      <section class="panel transcript-panel">
+        <div class="panel-head"><div><p class="eyebrow">LIVE TRANSCRIPT</p><h2>Classroom stream</h2></div><span class="streaming"><i></i> Streaming</span></div>
+        <div id="transcriptFeed" class="transcript-feed" aria-live="polite"><div class="empty"><span>⌁</span><p>Waiting for the first classroom event…</p></div></div>
+      </section>
+
+      <aside class="right-stack">
+        <section class="panel ccs-panel">
+          <div class="panel-head"><div><p class="eyebrow">CONFUSION CONFIDENCE SCORE</p><h2>Live class signal</h2></div><button class="info" title="Weighted sigmoid of sentiment, keywords, latency and poll misses">?</button></div>
+          <div class="gauge-wrap"><div id="ccsGauge" class="gauge" style="--score:0deg"><div><strong id="ccsValue">0.00</strong><span id="ccsLabel">CALM</span></div></div><div class="gauge-scale"><span>0</span><span>0.6 trigger</span><span>1</span></div></div>
+          <div class="signals" id="signalBars">
+            <div><span>Sentiment</span><i><b id="sentimentBar"></b></i><em id="sentimentValue">0%</em></div>
+            <div><span>Keywords</span><i><b id="keywordBar"></b></i><em id="keywordValue">0%</em></div>
+            <div><span>Latency</span><i><b id="latencyBar"></b></i><em id="latencyValue">0%</em></div>
+            <div><span>Poll misses</span><i><b id="pollBar"></b></i><em id="pollValue">0%</em></div>
+          </div>
+          <p class="limitation" id="ccsLimitation">Waiting for evidence. CCS is a hypothesis, not a diagnosis.</p>
+        </section>
+
+        <section id="nudgePanel" class="panel nudge-panel" aria-live="assertive">
+          <div class="nudge-empty"><span>✦</span><div><strong>No intervention needed yet</strong><p>A concrete nudge appears once CCS crosses 0.60.</p></div></div>
+        </section>
+      </aside>
+    </div>
+
+    <section class="panel mastery-panel">
+      <div class="panel-head"><div><p class="eyebrow">BAYESIAN KNOWLEDGE TRACING</p><h2>Student mastery · <span id="masteryConcept">current concept</span></h2></div><div class="legend"><span><i class="secure"></i>Secure</span><span><i class="developing"></i>Developing</span><span><i class="support"></i>Needs support</span></div></div>
+      <div class="table-wrap"><table id="masteryTable"><thead><tr><th>Student</th><th>Mastery estimate</th><th>Evidence</th><th>Confidence</th><th>Status</th></tr></thead><tbody><tr><td colspan="5" class="waiting">Waiting for student evidence…</td></tr></tbody></table></div>
+      <p class="model-note">BKT updates use explicit poll correctness plus lower-weight CCS soft evidence. Estimates describe observed evidence in this session, never fixed student ability.</p>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/app.js"></script>
+</body></html>
