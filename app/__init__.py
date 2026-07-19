@@ -1,1 +1,1 @@
-"""ClassPulse live teaching intelligence package."""
+"""AhaLoop live teaching intelligence package."""

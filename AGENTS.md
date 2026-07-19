@@ -1,10 +1,10 @@
-# AGENTS.md — ClassPulse Build
+# AGENTS.md — AhaLoop Build
 
 ## What this project is
-ClassPulse detects when students are getting confused during a live online
+AhaLoop detects when students are getting confused during a live online
 class and nudges the teacher in real time on how to fix it, while tracking
 each student's evolving mastery per concept. Full design reference:
-`ClassPulse_Project_Document.md` in this repo — read it once for context,
+the project design document in this repo — read it once for context,
 but the scope below is what actually gets built first.
 
 ## Scope discipline — read this before doing anything else

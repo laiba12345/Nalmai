@@ -34,7 +34,7 @@ every other component consumes.
 ## Task 2 — CCS (Confusion Confidence Score) engine
 
 **Goal:** Build the live confusion-scoring engine described in
-ClassPulse_Project_Document.md §4.1.
+the original project design document §4.1.
 
 **Context:** For each transcript window, compute a CCS score from:
 sentiment (via GPT-5.6, Structured Outputs), keyword flags (simple rule
@@ -417,7 +417,7 @@ suggested reframing changes the outcome that follows it.
 
 ## Task 14 — Import recorded live-class lessons from ClassBank
 
-**Goal:** Let ClassPulse operate on authentic recorded classroom
+**Goal:** Let AhaLoop operate on authentic recorded classroom
 transcripts rather than only authored demo fixtures, while preserving the
 existing one-command demo and respecting ClassBank access rules.
 
@@ -510,11 +510,11 @@ or unvalidated claims merely to make the feature list longer.
 
 ## Task 20 — Close the intervention feedback loop
 
-**Goal:** Make ClassPulse improve which kind of intervention it recommends
+**Goal:** Make AhaLoop improve which kind of intervention it recommends
 from the teacher's decision and the next observed poll, rather than only
 recording those outcomes after the fact.
 
-**Why this matters:** The distinctive product claim should be: ClassPulse not
+**Why this matters:** The distinctive product claim should be: AhaLoop not
 only detects confusion and suggests an intervention; it records whether the
 teacher applied it and whether the next check improved, then uses that evidence
 when choosing a later intervention strategy in the same session.
@@ -661,7 +661,7 @@ judge confidence even when the dashboard appears to work.
 ## Task 24 — Establish a distinctive product identity
 
 **Goal:** Avoid confusion with the pre-existing Devpost education project named
-"ClassPulse" and make the closed intervention-feedback loop recognizable in one
+the former working name and make the closed intervention-feedback loop recognizable in one
 sentence.
 
 **Blocking user decision:** Before implementation, present 3–5 researched,
@@ -681,9 +681,9 @@ UI, package metadata, or documentation until the user explicitly chooses one.
   another education product
 
 **Definition of done:**
-- User-approved name and one-sentence positioning replace ClassPulse across UI,
+- User-approved name and one-sentence positioning replace the former name across UI,
   README, demo fixtures' presentation metadata, API title, and launch docs
-- A repository search finds no stale user-facing ClassPulse branding except a
+- A repository search finds no stale user-facing former-name branding except a
   migration note acknowledging the former name
 - All tests and the one-command demo pass after the rename
 

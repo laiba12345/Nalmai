@@ -4,7 +4,9 @@ from app.main import app
 client = TestClient(app)
 
 def test_health_and_lesson_catalog():
-    assert client.get("/api/health").json()["status"] == "ok"
+    health = client.get("/api/health").json()
+    assert health["status"] == "ok"
+    assert health["service"] == "AhaLoop"
     lessons = client.get("/api/classes").json()
     assert len(lessons) >= 3
     assert {"forces-live", "fractions-live", "photosynthesis-live"}.issubset({lesson["id"] for lesson in lessons})
@@ -20,7 +22,8 @@ def test_sse_stream_has_ordered_live_messages():
 def test_dashboard_is_served():
     response = client.get("/")
     assert response.status_code == 200
-    assert "ClassPulse" in response.text
+    assert "AhaLoop" in response.text
+    assert "ClassPulse" not in response.text
 
 def test_real_dataset_evidence_endpoint():
     response = client.get("/api/evidence/real-data")

@@ -98,7 +98,7 @@ def write_report(results: list[dict], output: Path = DEFAULT_REPORT) -> Path:
     early_precision = early_total["tp"] / (early_total["tp"] + early_total["fp"]) if early_total["tp"] + early_total["fp"] else 0
     early_recall = early_total["tp"] / (early_total["tp"] + early_total["fn"]) if early_total["tp"] + early_total["fn"] else 0
     lines = [
-        "# CCS Backtest", "", f"Generated from {len(results)} authored ClassPulse fixtures using the production CCS path and deterministic demo sentiment provider.", "",
+        "# CCS Backtest", "", f"Generated from {len(results)} authored AhaLoop fixtures using the production CCS path and deterministic demo sentiment provider.", "",
         "| Fixture | Confirmed Precision | Confirmed Recall | Early Precision | Early Recall |", "|---|---:|---:|---:|---:|",
     ]
     for item in results:

@@ -1,6 +1,8 @@
-# ClassPulse
+# AhaLoop
 
-ClassPulse is a focused real-time teaching copilot. It replays a simulated online class, fuses live confusion signals into a Confusion Confidence Score (CCS), updates per-student concept mastery with Bayesian Knowledge Tracing (BKT), and produces one concrete teacher nudge when confusion crosses a threshold.
+AhaLoop is a real-time teaching copilot that detects confusion, recommends an evidence-informed teaching move, observes the next check, and improves strategy selection within the live lesson.
+
+> Naming note: AhaLoop was formerly developed under the name **ClassPulse**. Internal compatibility identifiers may retain the former lowercase name so existing data and environment configuration continue to work.
 
 This repository follows `AGENTS.md` and implements Tasks 1–9 in `TASK_BRIEFS.md`. The broader earlier ClassroomOS simulator is intentionally not part of this scoped build.
 
@@ -127,7 +129,7 @@ poll correctness ─────────────────────
 
 - `app/stream.py`: validated fixture catalog and ordered asynchronous replay.
 - `app/ccs.py`: deterministic class-level signal features and bounded sigmoid fusion; CCS drives nudges but never changes every student's mastery.
-- `app/classbank.py`: time-aligned TalkBank CHAT parsing and ClassPulse conversion.
+- `app/classbank.py`: time-aligned TalkBank CHAT parsing and AhaLoop conversion.
 - `app/bkt.py`: deterministic BKT with explicit and soft evidence.
 - `app/memory.py`: SQLite mastery repository with timestamped upserts and restart-safe loading.
 - `app/llm.py`: strict schemas, OpenAI Responses adapter, and labeled demo provider.
@@ -215,7 +217,7 @@ Run `py scripts/backtest_nudge_outcome.py` to replay two matched control/reframe
 
 The repository includes the official TalkMoves public test splits under `data/real/talkmoves/`, licensed **CC BY-NC-SA 4.0** and preserved without content changes. TalkMoves contains human-transcribed, anonymized K–12 mathematics classroom language with teacher and student discourse-move annotations.
 
-ClassPulse validates:
+AhaLoop validates:
 
 - **30,401** annotated utterance pairs;
 - **23,250** teacher pairs across seven teacher talk-move labels;
@@ -233,7 +235,7 @@ Source: [SumnerLab/TalkMoves](https://github.com/SumnerLab/TalkMoves). Dataset p
 
 ## Recorded live-class lessons with ClassBank
 
-ClassPulse can import authentic ClassBank TIMSS-Math CHAT transcripts and replay them through the same runtime at their recorded utterance timestamps. Imported teacher and student turns appear in the normal transcript and CCS pipeline with a visible `RECORDED CLASSBANK` marker; session metadata retains the corpus citation and optional local media path.
+AhaLoop can import authentic ClassBank TIMSS-Math CHAT transcripts and replay them through the same runtime at their recorded utterance timestamps. Imported teacher and student turns appear in the normal transcript and CCS pipeline with a visible `RECORDED CLASSBANK` marker; session metadata retains the corpus citation and optional local media path.
 
 ClassBank requires registration, and its transcript/media server was not reachable from this build environment, so protected lessons are **not bundled or redistributed**. After downloading through your TalkBank account, run:
 
@@ -246,7 +248,7 @@ Restart the demo and imported lessons appear in the lesson selector. See [data/c
 ## Limitations
 
 - Fixtures replace real audio and platform integrations.
-- ClassBank imports use authentic recorded-lesson transcripts, but ClassPulse does not redistribute the protected media or yet transcribe its audio itself.
+- ClassBank imports use authentic recorded-lesson transcripts, but AhaLoop does not redistribute the protected media or yet transcribe its audio itself.
 - Live typed messages have no trustworthy response-latency value, so their latency contribution is zero; language and subsequent poll signals still apply normally.
 - Initial CCS weights and BKT parameters are expert defaults. CCS has been backtested against nine diverse authored fixtures, but it is not trained on deployment data; expanded-set confirmed recall is only 0.269 and displayed evidence quality remains uncalibrated.
 - CCS observes language, latency, and polls, not tone, facial expression, or silence quality.
@@ -258,7 +260,7 @@ Restart the demo and imported lessons appear in the lesson selector. See [data/c
 
 ## How I collaborated with Codex
 
-I used Codex as an implementation and evaluation partner, not as the source of the product idea or the final authority on educational claims. I supplied the ClassPulse goal, the staged task briefs, scope constraints, technology choices, and acceptance criteria. Codex inspected those instructions, implemented each bounded task, ran the application and tests, surfaced failures, and committed completed tasks separately so I could review the progression.
+I used Codex as an implementation and evaluation partner, not as the source of the product idea or the final authority on educational claims. I supplied the AhaLoop goal, the staged task briefs, scope constraints, technology choices, and acceptance criteria. Codex inspected those instructions, implemented each bounded task, ran the application and tests, surfaced failures, and committed completed tasks separately so I could review the progression.
 
 ### Prompts and task briefs I used
 

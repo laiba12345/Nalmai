@@ -1,4 +1,4 @@
-"""Import registered ClassBank CHAT downloads into the ClassPulse catalog."""
+"""Import registered ClassBank CHAT downloads into the AhaLoop catalog."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ def find_media(chat_path: Path, media_dir: Path | None) -> Path | None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Import time-aligned ClassBank CHAT lessons into ClassPulse.")
+    parser = argparse.ArgumentParser(description="Import time-aligned ClassBank CHAT lessons into AhaLoop.")
     parser.add_argument("inputs", nargs="+", type=Path, help="CHAT .cha files or directories containing them")
     parser.add_argument("--concept", required=True, help="Concept label used by CCS/BKT, e.g. fractions")
     parser.add_argument("--media-dir", type=Path, help="Directory containing matching ClassBank media files")
@@ -45,7 +45,7 @@ def main() -> None:
         output = import_chat_lesson(chat_path, args.output_dir, concept=args.concept, media_path=media)
         media_status = str(media) if media else "not linked (transcript replay still available)"
         print(f"Imported {chat_path.name} -> {output.name}; media: {media_status}")
-    print(f"Imported {len(chat_files)} lesson(s). Restart ClassPulse to see them in the lesson selector.")
+    print(f"Imported {len(chat_files)} lesson(s). Restart AhaLoop to see them in the lesson selector.")
 
 
 if __name__ == "__main__":

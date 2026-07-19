@@ -1,4 +1,4 @@
-# ClassPulse evaluation
+# AhaLoop evaluation
 
 ## Automated coverage of behavior
 
@@ -19,7 +19,7 @@ The Python test suite covers:
 - FastAPI health/catalog endpoints, SSE delivery, static dashboard delivery;
 - presence of the live transcript, CCS gauge, nudge panel, mastery table, and EventSource client.
 
-Final implementation checkpoint after ClassBank integration: **48 passed, 0 failed**. Ten deprecation warnings originate inside FastAPI under Python 3.14; no ClassPulse warning or failure was emitted. `node --check public/app.js` also passed.
+The automated suite is rerun after each implementation task. Framework deprecation warnings under Python 3.14 are tracked separately from AhaLoop failures. JavaScript syntax is also checked with Node.
 
 ## Real-data validation
 

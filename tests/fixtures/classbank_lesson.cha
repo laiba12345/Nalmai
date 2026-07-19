@@ -2,9 +2,9 @@
 @Begin
 @Languages:	eng
 @Participants:	TCH Teacher Teacher, ST1 Student Student, ST2 Student Student
-@ID:	eng|ClassPulse|TCH|||||Teacher|||
-@ID:	eng|ClassPulse|ST1|||||Student|||
-@ID:	eng|ClassPulse|ST2|||||Student|||
+@ID:	eng|AhaLoop|TCH|||||Teacher|||
+@ID:	eng|AhaLoop|ST1|||||Student|||
+@ID:	eng|AhaLoop|ST2|||||Student|||
 @Media:	classbank_lesson, video
 *TCH:	Why does dividing by a fraction increase the result? 1000_4200
 *ST1:	I'm not sure why it gets bigger. 4800_7100

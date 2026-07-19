@@ -1,4 +1,4 @@
-# ClassPulse demo script (3–4 minutes)
+# AhaLoop demo script (3–4 minutes)
 
 ## Start
 
@@ -30,6 +30,6 @@ Open the dashboard in a second tab and start another scenario. The **Active clas
 
 ## Show real-data evidence
 
-Scroll to **Real-data validation**. Show that ClassPulse loads 30,401 official TalkMoves teacher/student utterance pairs and their discourse annotations. Point out the source license and boundary: real classroom language validates ingestion and discourse coverage, while the scripted streams provide known confusion, latency, and poll ground truth.
+Scroll to **Real-data validation**. Show that AhaLoop loads 30,401 official TalkMoves teacher/student utterance pairs and their discourse annotations. Point out the source license and boundary: real classroom language validates ingestion and discourse coverage, while the scripted streams provide known confusion, latency, and poll ground truth.
 
-Finish with: “ClassPulse helps the teacher see confusion, understand the evidence, and act before the lesson moves on—and its language pipeline is checked against real K–12 classroom discourse.”
+Finish with: “AhaLoop helps the teacher see confusion, understand the evidence, act before the lesson moves on, and learn which intervention works best.”
