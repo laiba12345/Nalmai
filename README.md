@@ -189,4 +189,90 @@ Restart the demo and imported lessons appear in the lesson selector. See [data/c
 - Automated tests mock the Responses transport; a live GPT‑5.6 call requires the user’s valid API key and account access.
 - TalkMoves is restricted to attribution, noncommercial use, and share-alike redistribution under its source license.
 
-Codex was used to implement the FastAPI/SSE service, deterministic math, typed OpenAI boundary, test suite, fixtures, dashboard, launch scripts, and documentation.
+## How I collaborated with Codex
+
+I used Codex as an implementation and evaluation partner, not as the source of the product idea or the final authority on educational claims. I supplied the ClassPulse goal, the staged task briefs, scope constraints, technology choices, and acceptance criteria. Codex inspected those instructions, implemented each bounded task, ran the application and tests, surfaced failures, and committed completed tasks separately so I could review the progression.
+
+### Prompts and task briefs I used
+
+The collaboration started with direct prompts such as:
+
+> “I have an instruction file for the project. Build the project end to end. Make sure to test every aspect of it.”
+
+> “Implement everything; test if it’s correct.”
+
+> “Add real data to the project for greater impact and validation.”
+
+> “Push each task as a separate commit.”
+
+I then used the more precise briefs in [`TASK_BRIEFS.md`](./TASK_BRIEFS.md). Representative examples included:
+
+- Build a deterministic CCS engine from structured sentiment, keyword, latency, and poll signals, with calm/confused tests written first.
+- Implement BKT per student and concept without putting an LLM inside the mathematical update.
+- Route typed live-student messages through exactly the same queue and CCS/BKT path as replayed events.
+- Support isolated concurrent sessions while preserving the zero-setup single-class demo.
+- Expand the CCS backtest without retuning weights merely to improve reported numbers.
+- Compare TalkMoves discourse labels with a documented sentiment proxy and report “agreement,” never “accuracy.”
+- Check confidence calibration and explicitly label it uncalibrated if the evidence did not support a probability claim.
+- Add matched nudge-outcome scenarios while stating that authored improvements are not a causal experiment.
+- Import authenticated ClassBank CHAT transcripts without redistributing protected classroom data.
+
+These task briefs made desired behavior, exclusions, test expectations, and claim boundaries explicit before implementation.
+
+### What Codex implemented
+
+Codex implemented and iteratively verified:
+
+- The FastAPI service, SSE event stream, session registry, compatibility routes, and static dashboard delivery.
+- The asynchronous classroom runtime shared by authored fixtures, typed live input, and imported ClassBank transcript turns.
+- Deterministic CCS fusion, early-warning and confirmed states, time decay, unique-student breadth, evidence reporting, and alert gating.
+- Deterministic BKT updates and SQLite persistence with prior-session mastery deltas.
+- GPT‑5.6 Responses API adapters using strict Structured Outputs for learning-state classification and teaching nudges, plus an honestly labeled deterministic fallback.
+- The live dashboard: transcript, CCS components, warning state, nudge panel, mastery table, live-input controls, active-session cards, and recorded-ClassBank labels.
+- TalkMoves ingestion and provenance reporting, expanded authored validation fixtures, confidence calibration analysis, matched nudge-outcome fixtures, and ClassBank CHAT import tooling.
+- Windows and Unix one-command launch scripts, `.env` loading, documentation, evaluation reports, and the separate task-level Git history.
+
+Codex also diagnosed issues found during integration rather than hiding them—for example, a session compatibility regression, a nudge-outcome poll linked before the reframe, duplicate anonymized ClassBank participant names, and the expanded fixture set’s substantially weaker recall.
+
+### What I decided, constrained, or rejected
+
+I retained responsibility for the product and evidence decisions:
+
+- I chose the core product goal: help a teacher notice developing confusion and receive a concise re-explanation suggestion while tracking concept mastery.
+- I chose Python/FastAPI, a lightweight browser UI, SQLite, GPT‑5.6 Structured Outputs, deterministic CCS/BKT math, and separate task commits.
+- I required the demo to distinguish simulated, typed-live, recorded-live-class, and genuinely model-generated data instead of presenting all inputs as live audio.
+- I rejected the idea that TalkMoves proxy agreement could be called sentiment “accuracy,” because its human labels describe discourse moves rather than confusion.
+- I rejected post-hoc CCS retuning solely to make three authored fixtures look better. The expanded nine-fixture benchmark therefore reports the weaker recall it actually found.
+- I rejected calling displayed CCS confidence a calibrated probability after the bucket analysis remained non-monotonic with a 0.242 weighted gap.
+- I rejected treating the +0.750 authored nudge-outcome delta as evidence that nudges cause learning; it validates linkage and A/B scaffolding only.
+- I decided to use ClassBank/TIMSS-Math as the path toward authentic recorded lessons, while keeping protected transcripts and media local and out of Git.
+- I identified live microphone capture and streaming speech-to-text as the next major product step. The current ClassBank integration replays human transcripts at recorded timestamps; it does not claim to be live microphone transcription.
+
+### Tests and evaluation Codex helped construct
+
+Codex helped build the current 48-test suite, including:
+
+- Fixture schema, event ordering, original timestamps, and asynchronous replay.
+- Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.
+- BKT correct/incorrect evidence, CCS soft evidence, SQLite round trips, restart loading, and session deltas.
+- Strict GPT‑5.6 model selection and JSON schemas for both classification and nudge generation.
+- One nudge per spike, calm suppression, and end-to-end runtime emission.
+- Live input using the shared processor, API validation, SSE behavior, and visible UI tagging.
+- Concurrent-session lifecycle and no-cross-talk checks.
+- TalkMoves schema, counts, provenance, and sentiment proxy-agreement reporting.
+- Nine-fixture CCS precision/recall and leakage-free pre-poll evaluation.
+- Confidence-bucket calibration and explicit heuristic labeling.
+- Matched control/reframed outcome linkage and `nudge_applied` propagation.
+- ClassBank CHAT participants, time alignment, media metadata, conversion, catalog discovery, and production-runtime compatibility.
+
+Codex also ran real-server smoke tests outside the in-process test client, exercised a configured GPT‑5.6 lesson replay, ran the TalkMoves sample through GPT‑5.6, checked JavaScript syntax, and regenerated the reports under [`validation/`](./validation/). I reviewed the reported boundaries rather than using passing tests as evidence of real-world classroom efficacy.
+
+### Required Codex feedback reference
+
+The Codex `/feedback` session ID for this collaboration is:
+
+```text
+019f6582-86b0-7f50-8b6a-9c00b666eff6
+```
+
+This ID identifies the Codex thread used for the implementation and evaluation collaboration described above.
