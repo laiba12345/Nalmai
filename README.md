@@ -131,6 +131,27 @@ py -m pytest
 
 The suite verifies event order/timestamps, all nine fixtures, calm/confused CCS, sigmoid bounds, BKT correctness and CCS soft-evidence weighting, both strict OpenAI schemas, one nudge per spike, calm suppression, full runtime integration, live input, persistence, concurrent-session isolation, SSE delivery, APIs, and required dashboard surfaces.
 
+## Blinded educator nudge evaluation
+
+Prepare a JSON list of authored or authorized/de-identified nudge items, then:
+
+```powershell
+py scripts/educator_nudge_evaluation.py source-items.json packet.json
+```
+
+Open `validation/educator_rating_form.html`, load `packet.json`, enter an
+anonymous rater code, and rate the packet. A small packet should take under ten
+minutes. After downloading `educator-ratings.json`, regenerate results:
+
+```powershell
+py scripts/report_educator_ratings.py educator-ratings.json educator-report.json
+```
+
+The packet hides provider identity and rejects direct identifier fields. Never
+export protected classroom text without authorization and de-identification.
+Authentic educator results are not yet collected; synthetic fixtures validate
+the workflow only. See `validation/EDUCATOR_NUDGE_EVALUATION.md`.
+
 ## CCS validation
 
 Run the reproducible authored-fixture backtest with:
