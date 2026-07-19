@@ -3,7 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query, status
+from fastapi import FastAPI, HTTPException, Query, Request, status
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -14,6 +15,7 @@ from app.real_data import TalkMovesCorpus
 from app.memory import build_memory
 from app.sessions import SessionRegistry
 from app.config import load_env_file
+from app.transcription import build_transcriber
 
 load_env_file()
 from pydantic import BaseModel, Field
@@ -23,6 +25,7 @@ PUBLIC = ROOT / "public"
 app = FastAPI(title="ClassPulse", version="1.0.0")
 app.mount("/static", StaticFiles(directory=PUBLIC), name="static")
 session_registry = SessionRegistry(build_provider, build_memory)
+transcriber = build_transcriber()
 legacy_sessions: dict[str, str] = {}
 
 
@@ -34,6 +37,11 @@ class LiveStudentInput(BaseModel):
 
 class SessionCreate(BaseModel):
     fixture_id: str
+    mode: str = "replay"
+
+
+class NudgeDecision(BaseModel):
+    decision: str
 
 
 def _runtime_for_lesson(lesson_id: str, *, for_stream: bool = False) -> ClassRuntime:
@@ -72,9 +80,11 @@ def real_data_evidence():
 @app.post("/api/sessions", status_code=status.HTTP_201_CREATED)
 def create_session(payload: SessionCreate):
     try:
-        return session_registry.create(payload.fixture_id).summary()
+        return session_registry.create(payload.fixture_id, mode=payload.mode).summary()
     except FileNotFoundError as error:
         raise HTTPException(404, str(error)) from error
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
 
 
 @app.get("/api/sessions")
@@ -108,6 +118,53 @@ def session_live_input(session_id: str, payload: LiveStudentInput):
     if record.runtime.completed:
         raise HTTPException(409, "Session is complete")
     return {"accepted": True, "event": record.runtime.submit_live_event(payload.student_id, payload.text, payload.timestamp)}
+
+
+@app.post("/api/sessions/{session_id}/audio-chunks", status_code=status.HTTP_202_ACCEPTED)
+async def session_audio_chunk(
+    session_id: str, request: Request, offset_seconds: float = Query(0, ge=0),
+    teacher_speaker: str = Query("speaker_0", min_length=1), filename: str = Query("classroom.webm"),
+):
+    record = _session_record(session_id)
+    audio = await request.body()
+    if not audio:
+        raise HTTPException(400, "Audio chunk is empty")
+    if len(audio) > 20 * 1024 * 1024:
+        raise HTTPException(413, "Audio chunk exceeds 20 MB")
+    if transcriber is None:
+        raise HTTPException(503, "OPENAI_API_KEY is required for live transcription")
+    try:
+        segments = await run_in_threadpool(transcriber.transcribe, audio, filename)
+    except Exception as error:
+        raise HTTPException(502, f"Transcription failed: {error}") from error
+    events = [
+        record.runtime.submit_transcript_segment(segment, offset_seconds=offset_seconds, teacher_speaker=teacher_speaker)
+        for segment in segments
+    ]
+    return {"accepted": True, "model": transcriber.model, "segments": [segment.as_dict() for segment in segments], "events": events}
+
+
+@app.post("/api/sessions/{session_id}/nudges/{nudge_id}/decision")
+def decide_session_nudge(session_id: str, nudge_id: str, payload: NudgeDecision):
+    record = _session_record(session_id)
+    try:
+        return record.runtime.decide_nudge(nudge_id, payload.decision)
+    except KeyError as error:
+        raise HTTPException(404, f"Unknown nudge: {nudge_id}") from error
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
+
+
+@app.get("/api/sessions/{session_id}/outcomes")
+def session_outcomes(session_id: str):
+    return _session_record(session_id).runtime.outcomes.snapshot()
+
+
+@app.post("/api/sessions/{session_id}/stop")
+def stop_session(session_id: str):
+    runtime = _session_record(session_id).runtime
+    runtime.stop()
+    return {"stopping": True, "session_id": session_id}
 
 
 @app.get("/api/stream/{lesson_id}")

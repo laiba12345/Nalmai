@@ -465,7 +465,43 @@ authorized user.
 
 ---
 
-## Stretch tasks (only if Tasks 1-14 are done and fully working with time left)
+## Task 15 — Live browser speech-to-text
+
+Capture camera and microphone in the dashboard, record standalone six-second
+audio windows, and send each window through the OpenAI Audio transcription API.
+A live session stays open until the teacher stops capture. The API key remains
+server-side and live turns use the same CCS/BKT/nudge runtime as replays.
+
+## Task 16 — Speaker diarization
+
+Use `gpt-4o-transcribe-diarize` with `diarized_json` and automatic chunking.
+Map the configured speaker ID to Teacher; treat other identified speakers as
+student transcript input. Preserve segment start/end offsets and speaker IDs.
+
+## Task 17 — Teacher explanation-risk schema
+
+Analyze every teacher transcript segment using GPT-5.6 Structured Outputs with
+a strict schema for factual risk, clarity risk, possible issue, evidence, and a
+suggested check. The deterministic demo provider implements the same type.
+
+## Task 18 — Applied/dismissed nudge controls
+
+Give every nudge an ID and show Applied/Dismissed controls. Persist the decision
+in the in-memory session outcome tracker and expose it through the session API.
+
+## Task 19 — Observed live outcome evaluation
+
+Link each nudge to the first subsequent poll for the same concept, reporting
+baseline correctness, next-poll correctness, and observed delta. Present this
+as observational session evidence, not a causal claim.
+
+**Implementation checkpoint:** Complete together as the live lecture extension;
+the automated suite covers schemas, transcription payloads, diarized event
+routing, decision validation, outcome linkage, API behavior, and live sessions.
+
+---
+
+## Stretch tasks (only if Tasks 1-19 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT

@@ -24,12 +24,14 @@ explicitly asked in a task prompt, even if the design doc describes it.
    GPT-5.6 to draft the re-explanation suggestion
 5. Dashboard UI — the single screen that ties all of the above together
    live: transcript feed, CCS indicator, nudge alerts, mastery table
+6. Browser camera/microphone capture with chunked streaming speech-to-text
+   and speaker diarization
+7. Teacher explanation-risk analysis, nudge decisions, and observed
+   next-poll outcome tracking
 
 ## Explicitly OUT of scope — do not build these
 - Teacher Memory Agent persistence across multiple sessions
-- Independent outcome verification (§4.2b in the design doc)
 - End-of-session demo lesson generator
-- Real speech-to-text / raw audio processing
 - Multi-teacher or multi-class support
 - Any database beyond in-memory or SQLite
 

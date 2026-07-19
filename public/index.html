@@ -5,6 +5,7 @@
   <meta name="description" content="ClassPulse live classroom confusion intelligence">
   <title>ClassPulse — Live Teaching Intelligence</title>
   <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/live.css">
 </head>
 <body>
   <header class="topbar">
@@ -26,6 +27,14 @@
     </section>
 
     <section class="active-sessions-strip"><div><p class="eyebrow">SCHOOL PULSE</p><strong>Active sessions</strong></div><div id="activeSessions" class="session-cards"><span>Creating default session…</span></div></section>
+
+    <section class="live-studio panel">
+      <div><p class="eyebrow">LIVE LECTURE INPUT</p><h2>Camera + streaming transcription</h2><p>Records short audio windows, transcribes them, and identifies teacher/student speakers.</p></div>
+      <video id="lecturePreview" muted autoplay playsinline></video>
+      <label>Teacher speaker ID<input id="teacherSpeaker" value="speaker_0" aria-label="Teacher speaker ID"></label>
+      <button id="startLecture">Start live lecture</button><button id="stopLecture" disabled>Stop</button>
+      <span id="captureStatus">Camera and microphone are off.</span>
+    </section>
 
     <section class="stats">
       <article><span class="stat-icon purple">◌</span><div><small>CURRENT CONCEPT</small><strong id="conceptName">—</strong><p>Live transcript context</p></div></article>
@@ -56,6 +65,7 @@
         <section id="nudgePanel" class="panel nudge-panel" aria-live="assertive">
           <div class="nudge-empty"><span>✦</span><div><strong>No intervention needed yet</strong><p>A concrete nudge appears once CCS crosses 0.60.</p></div></div>
         </section>
+        <section id="explanationRisk" class="panel risk-panel" aria-live="polite"><p class="eyebrow">TEACHER EXPLANATION RISK</p><strong>Waiting for teacher speech</strong><p>Each teacher segment is checked for factual and clarity risk with a strict schema.</p></section>
       </aside>
     </div>
 
@@ -63,6 +73,11 @@
       <div class="panel-head"><div><p class="eyebrow">BAYESIAN KNOWLEDGE TRACING</p><h2>Student mastery · <span id="masteryConcept">current concept</span></h2></div><div class="legend"><span><i class="secure"></i>Secure</span><span><i class="developing"></i>Developing</span><span><i class="support"></i>Needs support</span></div></div>
       <div class="table-wrap"><table id="masteryTable"><thead><tr><th>Student</th><th>Mastery estimate</th><th>Evidence</th><th>Confidence</th><th>Status</th></tr></thead><tbody><tr><td colspan="5" class="waiting">Waiting for student evidence…</td></tr></tbody></table></div>
       <p class="model-note">BKT updates use explicit poll correctness plus lower-weight CCS soft evidence. Estimates describe observed evidence in this session, never fixed student ability.</p>
+    </section>
+    <section class="panel outcome-panel">
+      <div class="panel-head"><div><p class="eyebrow">OBSERVED OUTCOMES</p><h2>Nudge decisions and next-poll change</h2></div></div>
+      <div class="table-wrap"><table id="outcomeTable"><thead><tr><th>Nudge</th><th>Decision</th><th>Before</th><th>Next poll</th><th>Observed delta</th></tr></thead><tbody><tr><td colspan="5" class="waiting">No nudges recorded yet.</td></tr></tbody></table></div>
+      <p class="model-note">This links a teacher decision to the next observed poll. It is session evidence, not proof that the nudge caused the change.</p>
     </section>
     <section id="realDataPanel" class="panel real-data-panel">
       <div class="panel-head"><div><p class="eyebrow">REAL-DATA VALIDATION</p><h2>TalkMoves · K–12 mathematics discourse</h2></div><a href="https://github.com/SumnerLab/TalkMoves" target="_blank" rel="noopener">Official source ↗</a></div>
@@ -73,4 +88,5 @@
   </main>
   <div id="toast" class="toast" role="status"></div>
   <script src="/static/app.js"></script>
+  <script src="/static/live.js"></script>
 </body></html>

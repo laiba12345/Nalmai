@@ -24,6 +24,17 @@ NUDGE_SCHEMA = {
     "properties": {"concept": {"type": "string"}, "trigger_reason": {"type": "string"}, "suggested_reframing": {"type": "string"}},
     "required": ["concept", "trigger_reason", "suggested_reframing"],
 }
+EXPLANATION_RISK_SCHEMA = {
+    "type": "object", "additionalProperties": False,
+    "properties": {
+        "concept": {"type": "string"},
+        "factual_risk": {"type": "number", "minimum": 0, "maximum": 1},
+        "clarity_risk": {"type": "number", "minimum": 0, "maximum": 1},
+        "possible_issue": {"type": "string"}, "evidence": {"type": "string"},
+        "suggested_check": {"type": "string"},
+    },
+    "required": ["concept", "factual_risk", "clarity_risk", "possible_issue", "evidence", "suggested_check"],
+}
 
 
 class SentimentResult(BaseModel):
@@ -41,12 +52,23 @@ class NudgeResult(BaseModel):
     suggested_reframing: str
 
 
+class ExplanationRiskResult(BaseModel):
+    concept: str
+    factual_risk: float = Field(ge=0, le=1)
+    clarity_risk: float = Field(ge=0, le=1)
+    possible_issue: str
+    evidence: str
+    suggested_check: str
+
+
 class StructuredProvider(ABC):
     mode: str
     @abstractmethod
     def classify_sentiment(self, text: str) -> SentimentResult: ...
     @abstractmethod
     def generate_nudge(self, concept: str, evidence: dict) -> NudgeResult: ...
+    @abstractmethod
+    def analyze_explanation(self, concept: str, text: str) -> ExplanationRiskResult: ...
 
 
 class OpenAIStructuredProvider(StructuredProvider):
@@ -73,6 +95,11 @@ class OpenAIStructuredProvider(StructuredProvider):
         payload = self._request("You are a real-time teacher copilot. Return only the strict schema.", prompt, "teacher_nudge", NUDGE_SCHEMA)
         return NudgeResult.model_validate(payload)
 
+    def analyze_explanation(self, concept: str, text: str) -> ExplanationRiskResult:
+        prompt = f"Concept: {concept}\nTeacher utterance: {text}\nIdentify only plausible factual or clarity risks. Do not declare the teacher wrong when context is insufficient."
+        payload = self._request("You are a cautious instructional-quality reviewer. Return the strict schema.", prompt, "teacher_explanation_risk", EXPLANATION_RISK_SCHEMA)
+        return ExplanationRiskResult.model_validate(payload)
+
 
 class DemoStructuredProvider(StructuredProvider):
     """Credential-free, explicitly labeled test/demo stand-in for the typed LLM boundary."""
@@ -94,6 +121,15 @@ class DemoStructuredProvider(StructuredProvider):
         }
         reason = f"{evidence.get('confused_lines', 0)} confused-language lines, {evidence.get('poll_misses', 0)} poll misses, and {evidence.get('average_latency_seconds', 0)}s average latency."
         return NudgeResult(concept=concept, trigger_reason=reason, suggested_reframing=frames.get(concept, f"Ask students to represent {concept} in a different way and explain what changed."))
+
+    def analyze_explanation(self, concept: str, text: str) -> ExplanationRiskResult:
+        lowered = text.lower()
+        rule_only = any(term in lowered for term in ("always", "just remember", "rule"))
+        return ExplanationRiskResult(
+            concept=concept, factual_risk=.12, clarity_risk=.68 if rule_only else .22,
+            possible_issue="A rule may be stated without enough conceptual support." if rule_only else "No specific issue detected from this isolated utterance.",
+            evidence=text[:240], suggested_check="Ask a student to explain why the representation supports the rule." if rule_only else "Check understanding with a short student explanation.",
+        )
 
 
 def build_provider() -> StructuredProvider:

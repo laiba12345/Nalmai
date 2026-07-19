@@ -55,6 +55,27 @@ Without a key, the dashboard visibly reports **Deterministic demo fallback**. Th
 
 The implementation follows the official [Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses) and [GPT‑5.6 model documentation](https://developers.openai.com/api/docs/models/gpt-5.6-sol).
 
+## Live lecture pipeline
+
+1. Choose the closest lesson/concept, then click **Start live lecture**.
+2. The browser requests camera and microphone permission. Video stays in the
+   local preview; standalone six-second audio windows are uploaded to FastAPI.
+3. The server calls `gpt-4o-transcribe-diarize` with `diarized_json`. Set the
+   teacher speaker ID (normally `speaker_0`) in the dashboard; all other speaker
+   segments enter the student-signal path.
+4. Teacher text is checked by GPT-5.6 against the strict explanation-risk
+   schema. Student text updates CCS and BKT through the existing runtime.
+5. A threshold-crossing nudge includes **Applied** and **Dismissed** controls.
+   The first later poll is linked to that decision and the dashboard reports
+   the observed correctness delta.
+
+The API key stays in `.env` on the server. The capture path requires
+`OPENAI_API_KEY`; deterministic demo mode still supports scripted replays but
+cannot transcribe audio. Transcription is near-real-time and chunked, so output
+arrives after each audio window plus API latency. Speaker labels are model
+estimates and the teacher ID may need changing. Outcome deltas are observational
+and do not establish that a nudge caused learning.
+
 ## Architecture
 
 ### Repository layout

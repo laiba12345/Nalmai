@@ -9,13 +9,15 @@ from app.bkt import BKTTracker
 from app.ccs import CCSEngine, SignalWindow
 from app.llm import StructuredProvider
 from app.nudges import NudgeEngine
+from app.outcomes import OutcomeTracker
+from app.transcription import DiarizedSegment
 from app.stream import ScriptedClass, replay_events
 
 logger = logging.getLogger("classpulse.runtime")
 
 
 class ClassRuntime:
-    def __init__(self, lesson: ScriptedClass, provider: StructuredProvider, memory=None, session_id: str | None = None):
+    def __init__(self, lesson: ScriptedClass, provider: StructuredProvider, memory=None, session_id: str | None = None, live_mode: bool = False):
         self.lesson, self.provider = lesson, provider
         self.ccs, self.bkt, self.nudges = CCSEngine(), BKTTracker(memory=memory), NudgeEngine(provider)
         self.sentiments = deque(maxlen=5); self.latencies = deque(maxlen=5); self.quotes = deque(maxlen=5)
@@ -30,7 +32,10 @@ class ClassRuntime:
         self.completed = False
         self.session_id = session_id or lesson.id
         self.current_ccs = 0.0
+        self.outcomes = OutcomeTracker()
+        self.last_poll_correctness: float | None = None
         self.status = "created"
+        self.live_mode = live_mode
 
     def _window(self) -> SignalWindow:
         return SignalWindow(
@@ -58,6 +63,27 @@ class ClassRuntime:
         self.event_queue.put_nowait(event)
         return event
 
+    def submit_transcript_segment(self, segment: DiarizedSegment, *, offset_seconds: float, teacher_speaker: str) -> dict:
+        is_teacher = segment.speaker == teacher_speaker
+        event = {
+            "id": f"audio-{len(self.processed_sources) + self.event_queue.qsize() + 1}",
+            "at": round(offset_seconds + segment.start, 3), "end_at": round(offset_seconds + segment.end, 3),
+            "type": "teacher" if is_teacher else "chat", "speaker": "Teacher" if is_teacher else segment.speaker,
+            "text": segment.text, "latency_seconds": 0, "source": "live_audio", "live": True,
+            "session_id": self.session_id, "lesson_id": self.lesson.id, "concept": self.lesson.concept,
+        }
+        if not is_teacher and segment.speaker not in self.lesson.students:
+            self.lesson.students.append(segment.speaker)
+        self.event_queue.put_nowait(event)
+        return event
+
+    def decide_nudge(self, nudge_id: str, decision: str) -> dict:
+        return self.outcomes.decide(nudge_id, decision, self.current_at).as_dict()
+
+    def stop(self) -> None:
+        if not self.completed:
+            self.event_queue.put_nowait(None)
+
     async def process_event(self, event: dict) -> AsyncIterator[dict]:
         event.setdefault("source", "scripted"); event.setdefault("live", False); event["session_id"] = self.session_id
         self.processed_sources.append(event["source"]); self.current_at = event.get("at", self.current_at)
@@ -65,6 +91,9 @@ class ClassRuntime:
         if event["type"] in ("teacher", "chat"):
             sentiment = self.provider.classify_sentiment(event["text"])
             event["learning_state"] = sentiment.model_dump()
+        if event["type"] == "teacher":
+            risk = self.provider.analyze_explanation(self.lesson.concept, event["text"])
+            yield {"kind": "explanation_risk", "data": {**risk.model_dump(), "session_id": self.session_id, "at": self.current_at}}
         if event["type"] == "chat":
             effective_label = "confused" if sentiment.confusion_probability >= .5 else sentiment.sentiment
             self.sentiments.append((effective_label, sentiment.confusion_probability))
@@ -77,6 +106,8 @@ class ClassRuntime:
             self.quotes.append(event["text"])
         elif event["type"] == "poll":
             answers = list(event["responses"].values()); self.poll_correct.extend(answers)
+            self.last_poll_correctness = sum(answers) / len(answers)
+            self.outcomes.observe_poll(self.lesson.concept, self.current_at, self.last_poll_correctness)
             self.poll_events.extend((answer, self.current_at) for answer in answers)
             for student, correct in event["responses"].items():
                 self.bkt.update_mastery(student, self.lesson.concept, correct=correct, ccs=None)
@@ -90,9 +121,12 @@ class ClassRuntime:
             yield {"kind": "mastery", "data": {"students": self.bkt.snapshot(self.lesson.concept, self.lesson.students), "session_id": self.session_id}}
         nudge = self.nudges.consider(self.lesson.concept, result.score, result.evidence)
         if nudge:
-            yield {"kind": "nudge", "data": {**nudge.model_dump(), "confidence": result.confidence, "evidence": result.evidence, "limitations": result.limitations, "llm_mode": self.provider.mode, "session_id": self.session_id}}
+            outcome = self.outcomes.register(self.lesson.concept, self.current_at, self.last_poll_correctness)
+            yield {"kind": "nudge", "data": {**nudge.model_dump(), "nudge_id": outcome.nudge_id, "confidence": result.confidence, "evidence": result.evidence, "limitations": result.limitations, "llm_mode": self.provider.mode, "session_id": self.session_id}}
 
     async def _produce_replay(self, speed: float) -> None:
+        if self.live_mode:
+            return
         async for event in replay_events(self.lesson, speed):
             event["source"] = self.lesson.source; event["live"] = False
             await self.event_queue.put(event)
