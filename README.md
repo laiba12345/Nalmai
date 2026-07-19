@@ -152,6 +152,15 @@ export protected classroom text without authorization and de-identification.
 Authentic educator results are not yet collected; synthetic fixtures validate
 the workflow only. See `validation/EDUCATOR_NUDGE_EVALUATION.md`.
 
+## Held-out confusion annotation
+
+Task 22 adds a frozen-configuration annotation and evaluation path for educator
+labels that were not used to tune CCS. Run `py scripts/heldout_confusion.py
+export ...` and `py scripts/heldout_confusion.py evaluate ...`; see
+`validation/HELDOUT_CONFUSION_EVALUATION.md`. The workflow refuses calibration
+fixtures, future-poll leakage, configuration mismatches, and TalkMoves labels as
+confusion truth. Authentic held-out results remain pending.
+
 ## CCS validation
 
 Run the reproducible authored-fixture backtest with:
