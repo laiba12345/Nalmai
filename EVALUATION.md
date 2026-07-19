@@ -36,6 +36,8 @@ Official TalkMoves public test splits were loaded from the SumnerLab release:
 
 This validates operation on real classroom language and authentic discourse annotations. TalkMoves has no confusion, latency, poll, or mastery labels, so it is not reported as a CCS accuracy benchmark.
 
+A separate balanced 15-utterance proxy check mapped TalkMoves labels 2/3/4 to confused/neutral/positive directions. The deterministic fallback reached **0.400 agreement** and GPT‑5.6 reached **0.667 agreement**. These are proxy-agreement rates, not accuracy; the human labels annotate discourse function rather than learning-state sentiment.
+
 ## Authored-fixture CCS backtest
 
 The production CCS path was replayed against confusion annotations in all nine scripted fixtures:

@@ -147,6 +147,10 @@ ClassPulse validates:
 
 This strengthens real-language and ingestion validation. It does not establish CCS accuracy because TalkMoves supplies discourse labels rather than confusion labels, latency, polls, or mastery outcomes. The synthetic scenarios retain known confusion ground truth for end-to-end validation.
 
+### TalkMoves sentiment proxy agreement
+
+Run `py scripts/talkmoves_sentiment_check.py` to compare classifier output with a deliberately limited discourse-to-sentiment proxy: asking for information → confused, making a claim → neutral, and providing evidence → positive. Labels without a defensible direction are excluded. On a balanced 15-utterance sample, the deterministic fallback agreed on **6/15 (0.400)** and GPT‑5.6 agreed on **10/15 (0.667)**. This is **agreement with a judgment-call proxy, not accuracy and not confusion ground truth**. See [validation/TALKMOVES_SENTIMENT_PROXY.md](./validation/TALKMOVES_SENTIMENT_PROXY.md) for the mapping, per-label results, sampled utterances, and limitations.
+
 Source: [SumnerLab/TalkMoves](https://github.com/SumnerLab/TalkMoves). Dataset paper: [Suresh et al.](https://arxiv.org/abs/2204.09652). See [`data/real/talkmoves/DATASET.md`](./data/real/talkmoves/DATASET.md) for attribution and usage boundaries.
 
 ## Limitations
