@@ -57,6 +57,21 @@ The implementation follows the official [Responses API](https://developers.opena
 
 ## Architecture
 
+### Repository layout
+
+```text
+app/          FastAPI service and CCS, BKT, LLM, session, and persistence modules
+data/classes/ Authored live-class fixtures and confusion ground truth
+data/real/    Licensed TalkMoves classroom-language validation data
+public/       Dependency-free dashboard assets
+scripts/      Reproducible evaluation utilities
+tests/        Unit, integration, API, UI-contract, and persistence tests
+validation/   Generated benchmark reports
+```
+
+The backend intentionally lives directly in `app/`; there is no parallel `src/` tree. All automated tests live in `tests/`.
+An empty `.agents/` folder may be recreated by the local Codex environment; it is ignored and is not part of the application.
+
 ```text
 JSON fixture → timed async replay → FastAPI SSE → dashboard transcript
                          │

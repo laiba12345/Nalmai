@@ -4,6 +4,7 @@ __pycache__/
 htmlcov/
 .venv/
 .env
+.agents/
 data/*.db
 data/*.db-shm
 data/*.db-wal
