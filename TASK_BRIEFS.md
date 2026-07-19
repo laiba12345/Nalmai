@@ -415,7 +415,57 @@ suggested reframing changes the outcome that follows it.
 
 ---
 
-## Stretch tasks (only if Tasks 1-9 are done and fully working with time left)
+## Task 14 — Import recorded live-class lessons from ClassBank
+
+**Goal:** Let ClassPulse operate on authentic recorded classroom
+transcripts rather than only authored demo fixtures, while preserving the
+existing one-command demo and respecting ClassBank access rules.
+
+**Context:** ClassBank TIMSS-Math provides real classroom video linked to
+human transcripts in TalkBank CHAT format. The corpus requires a free
+TalkBank account, compliance with the TalkBank Ground Rules, and the
+corpus citation. Protected transcripts and media must not be redistributed
+through this repository. This task integrates locally downloaded data; it
+does not yet implement microphone capture or streaming speech-to-text.
+
+**Constraints:**
+- Parse time-aligned CHAT (`.cha`) transcripts without adding a heavyweight
+  dependency; preserve teacher/student roles and millisecond media timing
+- Import locally downloaded transcripts into `data/classbank/processed/`
+  and discover them automatically alongside the three curated demos
+- Retain corpus, media, citation, access URL, and source metadata on every
+  imported lesson/session; visibly mark replayed turns as recorded
+  ClassBank data rather than live microphone input
+- Keep `data/classbank/raw/`, `data/classbank/media/`, and generated
+  processed lessons ignored by Git; never commit protected classroom data,
+  student identifiers, credentials, or media
+- Imported turns must enter the existing runtime, CCS, BKT, session, and
+  nudge path rather than creating a parallel analysis pipeline
+- The original three-class API catalog and one-command demo must behave
+  exactly as before when no local ClassBank files have been imported
+
+**Definition of done:**
+- `scripts/import_classbank.py` accepts CHAT files/directories, a concept,
+  and an optional directory of matching audio/video files
+- Imported lessons appear in the dashboard selector after restart and
+  replay using recorded CHAT timestamps with `source=classbank`
+- Transcript turns display a `RECORDED CLASSBANK` marker, while session
+  data exposes source and provenance metadata
+- `data/classbank/README.md` documents account registration, TIMSS-Math
+  acquisition, citation, privacy, folders, and the import command
+- Automated tests cover CHAT parsing, participant roles, timestamps,
+  media metadata, conversion, and compatibility with `ScriptedClass`
+- Real-server smoke test confirms an imported lesson is discovered and
+  completes through SSE without changing the default demo catalog
+
+**Implementation checkpoint:** Complete in commit `f75dd2d`; 48 tests
+pass. The importer and replay integration are complete, but the protected
+TIMSS-Math files themselves are not bundled and must be downloaded by an
+authorized user.
+
+---
+
+## Stretch tasks (only if Tasks 1-14 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT
