@@ -21,6 +21,17 @@ def test_openai_diarized_transcriber_uses_supported_model_and_schema():
     assert result[0].speaker == "teacher"
 
 
+def test_openai_diarized_transcriber_accepts_dictionary_segments():
+    class Transcriptions:
+        def create(self, **kwargs):
+            return {"segments": [{"speaker": "speaker_1", "text": "  I need another example.  ", "start": 1, "end": 2.5}]}
+    client = type("Client", (), {"audio": type("Audio", (), {"transcriptions": Transcriptions()})()})()
+
+    result = OpenAIDiarizedTranscriber(client).transcribe(b"webm-bytes")
+
+    assert result == [DiarizedSegment("speaker_1", "I need another example.", 1.0, 2.5)]
+
+
 def test_diarized_segments_enter_the_existing_runtime_queue():
     runtime = ClassRuntime(ScriptedClass.load("fractions_live"), DemoStructuredProvider())
     event = runtime.submit_transcript_segment(

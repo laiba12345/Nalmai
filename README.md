@@ -416,7 +416,7 @@ I retained responsibility for the product and evidence decisions:
 
 ### Tests and evaluation Codex helped construct
 
-Codex helped build the current 106-test suite, including:
+Codex helped build the current 107-test suite, including:
 
 - Fixture schema, event ordering, original timestamps, and asynchronous replay.
 - Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.

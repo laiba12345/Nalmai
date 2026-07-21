@@ -33,10 +33,17 @@ class OpenAIDiarizedTranscriber:
         response = self.client.audio.transcriptions.create(
             model=self.model, file=file, response_format="diarized_json", chunking_strategy="auto",
         )
-        return [
-            DiarizedSegment(str(segment.speaker), segment.text.strip(), float(segment.start), float(segment.end))
-            for segment in response.segments if segment.text.strip()
-        ]
+        segments = response.get("segments", []) if isinstance(response, dict) else response.segments
+        result = []
+        for segment in segments:
+            value = segment.get if isinstance(segment, dict) else lambda key, default=None: getattr(segment, key, default)
+            text = str(value("text", "")).strip()
+            if text:
+                result.append(DiarizedSegment(
+                    str(value("speaker", "unknown")), text,
+                    float(value("start", 0)), float(value("end", 0)),
+                ))
+        return result
 
 
 def build_transcriber() -> OpenAIDiarizedTranscriber | None:
