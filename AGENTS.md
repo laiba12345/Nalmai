@@ -28,9 +28,10 @@ explicitly asked in a task prompt, even if the design doc describes it.
    and speaker diarization
 7. Teacher explanation-risk analysis, nudge decisions, and observed
    next-poll outcome tracking
+8. Bounded Teacher Memory Agent using concept-specific SQLite history and
+   GPT-5.6 Structured Outputs to personalize future live nudges
 
 ## Explicitly OUT of scope — do not build these
-- Teacher Memory Agent persistence across multiple sessions
 - End-of-session demo lesson generator
 - Multi-teacher or multi-class support
 - Any database beyond in-memory or SQLite

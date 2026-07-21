@@ -55,6 +55,15 @@ FOLLOWUP_POLL_SCHEMA = {
     },
     "required": ["concept", "question", "options", "correct_index", "explanation", "checks"],
 }
+MEMORY_INSIGHT_SCHEMA = {
+    "type": "object", "additionalProperties": False,
+    "properties": {
+        "summary": {"type": "string"}, "recurring_need": {"type": "string"},
+        "recommended_strategy": {"type": "string", "enum": ["visual_model", "worked_example", "contrast_case", "analogy", "student_explanation"]},
+        "rationale": {"type": "string"}, "limitations": {"type": "string"},
+    },
+    "required": ["summary", "recurring_need", "recommended_strategy", "rationale", "limitations"],
+}
 
 
 class SentimentResult(BaseModel):
@@ -100,6 +109,14 @@ class FollowupPollResult(BaseModel):
     checks: str
 
 
+class MemoryInsightResult(BaseModel):
+    summary: str
+    recurring_need: str
+    recommended_strategy: Literal["visual_model", "worked_example", "contrast_case", "analogy", "student_explanation"]
+    rationale: str
+    limitations: str
+
+
 class StructuredProvider(ABC):
     mode: str
     @abstractmethod
@@ -112,6 +129,8 @@ class StructuredProvider(ABC):
     def verify_nudge_implementation(self, concept: str, suggestion: str, strategy: str, teacher_text: str) -> ImplementationVerificationResult: ...
     @abstractmethod
     def generate_followup_poll(self, concept: str, suggestion: str, teacher_text: str, stage: str = "followup") -> FollowupPollResult: ...
+    @abstractmethod
+    def synthesize_memory(self, concept: str, context: dict) -> MemoryInsightResult: ...
 
 
 class OpenAIStructuredProvider(StructuredProvider):
@@ -154,6 +173,11 @@ class OpenAIStructuredProvider(StructuredProvider):
         prompt = f"Concept: {concept}\nTeaching move: {suggestion}\nAvailable classroom language: {teacher_text}\nCreate one short three-option {purpose}. It must have exactly one correct answer and avoid trick questions."
         payload = self._request("You create fair, age-appropriate formative assessment checks. Return the strict schema.", prompt, "followup_learning_check", FOLLOWUP_POLL_SCHEMA)
         return FollowupPollResult.model_validate(payload)
+
+    def synthesize_memory(self, concept: str, context: dict) -> MemoryInsightResult:
+        prompt = f"Concept: {concept}\nPseudonymous prior-session evidence: {json.dumps(context)}"
+        payload = self._request("Summarize only supplied longitudinal evidence for a teacher copilot. Prefer strategies with observed implementation and improvement, but never claim causality. Return the strict schema.", prompt, "teacher_memory_insight", MEMORY_INSIGHT_SCHEMA)
+        return MemoryInsightResult.model_validate(payload)
 
 
 class DemoStructuredProvider(StructuredProvider):
@@ -221,6 +245,12 @@ class DemoStructuredProvider(StructuredProvider):
         checks = baseline_checks if stage == "baseline" else followup_checks
         question, options, correct, explanation = checks.get(concept, (f"Which statement best applies the new explanation of {concept}?", ["The first statement", "The second statement", "The third statement"], 0, "The first statement applies the explanation."))
         return FollowupPollResult(concept=concept, question=question, options=options, correct_index=correct, explanation=explanation, checks=f"{stage.title()} conceptual check about {concept}.")
+
+    def synthesize_memory(self, concept: str, context: dict) -> MemoryInsightResult:
+        strategies = context.get("teacher", {}).get("strategies", {})
+        ranked = sorted(strategies, key=lambda name: (strategies[name].get("mean_observed_delta") or -1), reverse=True)
+        strategy = ranked[0] if ranked else "visual_model"
+        return MemoryInsightResult(summary=f"Prior evidence for {concept} was retrieved." if context.get("available") else "No prior evidence is available yet.", recurring_need="Review the current concept evidence alongside prior mastery.", recommended_strategy=strategy, rationale="Uses stored mastery and observed strategy outcomes without treating them as causal.", limitations="Sparse, pseudonymous records may not generalize to the next lesson.")
 
 
 def build_provider() -> StructuredProvider:

@@ -18,8 +18,10 @@ function appendTranscript(data) {
 
 function renderMeetingNudge(data) {
   const panel=document.querySelector('#meetingNudge');
+  const memory=data.evidence?.longitudinal_memory;
+  const memoryNote=memory?`<p class="memory-note"><b>Memory-informed:</b> ${escapeHtml(memory.summary)} ${escapeHtml(memory.rationale)}</p>`:'';
   panel.className='meeting-card nudge active';
-  panel.innerHTML=`<small>TEACHING SUGGESTION · ${escapeHtml(data.strategy.replaceAll('_',' '))}</small><strong>${escapeHtml(data.suggested_reframing)}</strong><p>${escapeHtml(data.trigger_reason)}</p><div class="nudge-actions"><button data-value="applied">Confirm applied</button><button data-value="dismissed">Not applied</button></div>`;
+  panel.innerHTML=`<small>TEACHING SUGGESTION · ${escapeHtml(data.strategy.replaceAll('_',' '))}</small><strong>${escapeHtml(data.suggested_reframing)}</strong><p>${escapeHtml(data.trigger_reason)}</p>${memoryNote}<div class="nudge-actions"><button data-value="applied">Confirm applied</button><button data-value="dismissed">Not applied</button></div>`;
   panel.querySelectorAll('button').forEach(button=>button.onclick=async()=>{
     await fetch(`/api/sessions/${state.sessionId}/nudges/${data.nudge_id}/decision`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({decision:button.dataset.value})});
     panel.querySelectorAll('button').forEach(item=>item.disabled=true);

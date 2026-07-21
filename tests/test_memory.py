@@ -115,6 +115,33 @@ def test_second_runtime_emits_persisted_starting_mastery():
         path.unlink(missing_ok=True)
 
 
+def test_teacher_memory_agent_retrieves_history_and_guides_live_nudge():
+    path = _db_path()
+    try:
+        memory = MasteryMemory(path)
+        memory.save_profile("teacher-1", "teacher", "Teacher")
+        memory.save_profile("student-1", "student", "Student")
+        tracker = BKTTracker(memory=memory)
+        tracker.update_mastery("student-1", "fractions", correct=False)
+        memory.save_teaching_outcomes("teacher-1", "prior-session", [{
+            "nudge_id": "prior-nudge", "concept": "fractions", "strategy": "analogy",
+            "implementation_status": "implemented", "correctness_delta": .2,
+        }])
+        runtime = ClassRuntime(ScriptedClass.load("fractions_live"), DemoStructuredProvider(),
+                               memory=memory, live_mode=True, teacher_id="teacher-1", student_ids=["student-1"])
+        messages = asyncio.run(_process_event(runtime, {
+            "id": "risk-memory", "at": 1, "type": "teacher", "speaker": "teacher-1",
+            "text": "Always just remember this rule.",
+        }))
+        insight = next(message for message in messages if message["kind"] == "memory_insight")
+        nudge = next(message for message in messages if message["kind"] == "nudge")
+        assert insight["data"]["recommended_strategy"] == "analogy"
+        assert nudge["data"]["strategy"] == "analogy"
+        assert "longitudinal_memory" in nudge["data"]["evidence"]
+    finally:
+        path.unlink(missing_ok=True)
+
+
 async def _consume(runtime):
     return [message async for message in runtime.run(speed=100_000)]
 
@@ -123,3 +150,7 @@ async def _first_mastery(runtime):
     async for message in runtime.run(speed=100_000):
         if message["kind"] == "mastery":
             return message["data"]
+
+
+async def _process_event(runtime, event):
+    return [message async for message in runtime.process_event(event)]

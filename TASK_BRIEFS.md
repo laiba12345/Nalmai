@@ -925,7 +925,21 @@ same live-call Teaching Suggestion panel used by confusion nudges.
 
 ---
 
-## Stretch tasks (only if Tasks 1-37 are done and fully working with time left)
+## Task 38 — Add a bounded Teacher Memory Agent
+
+**Goal:** Use prior concept-specific learner and teaching evidence to personalize
+future live interventions without giving the model unrestricted database access.
+
+**Definition of done:**
+- SQLite remains the source of truth for pseudonymous longitudinal evidence
+- The agent retrieves only the current concept, teacher, and connected students
+- GPT-5.6 returns a strict structured memory insight and strategy recommendation
+- Memory-informed nudges are visibly labelled and retain non-causal limitations
+- Sessions without history continue normally and the full suite passes
+
+---
+
+## Stretch tasks (only if Tasks 1-38 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT

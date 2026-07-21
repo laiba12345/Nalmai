@@ -52,7 +52,9 @@ class SessionRegistry:
         if mode == "live" and student_id:
             lesson = replace(lesson, students=[student_id])
         memory = self.memory_factory()
-        runtime = ClassRuntime(lesson, self.provider_factory(), memory=memory, session_id=session_id, live_mode=mode == "live")
+        runtime = ClassRuntime(lesson, self.provider_factory(), memory=memory, session_id=session_id,
+                               live_mode=mode == "live", teacher_id=teacher_id,
+                               student_ids=[student_id] if student_id else list(lesson.students))
         record = SessionRecord(session_id, fixture_id, runtime, datetime.now(timezone.utc).isoformat(), mode,
                                teacher_id, teacher_name, student_id, student_name)
         if memory:

@@ -11,7 +11,7 @@ DEFAULT_DB = Path(__file__).parents[1] / "data" / "nalmai.db"
 
 
 class MasteryMemory:
-    """Small SQLite repository for mastery state; no model logic lives here."""
+    """SQLite source of truth; model reasoning remains outside this repository."""
 
     def __init__(self, path: str | Path = DEFAULT_DB):
         self.path = Path(path); self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -121,6 +121,32 @@ class MasteryMemory:
         return {"subject_id": subject_id, "role": role, "display_name": profile[0] if profile else subject_id,
                 "sessions_with_nudges": len({row["session_id"] for row in rows}),
                 "strategies": strategies, "limitations": "Observed implementation and next-check changes are not causal proof of teaching improvement."}
+
+    def teaching_memory_context(self, teacher_id: str | None, student_ids: list[str], concept: str) -> dict:
+        students = []
+        for student_id in student_ids:
+            summary = self.performance_summary(student_id, "student")
+            students.append({"student_id": student_id, "concept_history": [
+                row for row in summary.get("concepts", []) if row["concept"] == concept
+            ]})
+        teacher = {"teacher_id": teacher_id, "strategies": {}}
+        if teacher_id:
+            with closing(self._connect()) as connection:
+                rows = connection.execute(
+                    "SELECT strategy, implementation_status, correctness_delta FROM teaching_outcomes WHERE teacher_id=? AND concept=?",
+                    (teacher_id, concept),
+                ).fetchall()
+            for row in rows:
+                item = teacher["strategies"].setdefault(row["strategy"], {"attempts": 0, "implemented": 0, "observed_deltas": []})
+                item["attempts"] += 1
+                item["implemented"] += row["implementation_status"] == "implemented"
+                if row["correctness_delta"] is not None:
+                    item["observed_deltas"].append(row["correctness_delta"])
+            for item in teacher["strategies"].values():
+                values = item.pop("observed_deltas")
+                item["mean_observed_delta"] = round(sum(values) / len(values), 3) if values else None
+        return {"available": bool(any(x["concept_history"] for x in students) or teacher["strategies"]),
+                "concept": concept, "students": students, "teacher": teacher}
 
 
 def build_memory() -> MasteryMemory | None:

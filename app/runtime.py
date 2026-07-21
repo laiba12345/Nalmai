@@ -8,6 +8,7 @@ from typing import AsyncIterator
 from app.bkt import BKTTracker
 from app.ccs import CCSEngine, SignalWindow
 from app.llm import StructuredProvider
+from app.memory_agent import TeacherMemoryAgent
 from app.nudges import NudgeEngine
 from app.outcomes import OutcomeTracker
 from app.transcription import DiarizedSegment
@@ -17,7 +18,7 @@ logger = logging.getLogger("nalmai.runtime")
 
 
 class ClassRuntime:
-    def __init__(self, lesson: ScriptedClass, provider: StructuredProvider, memory=None, session_id: str | None = None, live_mode: bool = False, model_timeout: float = 8.0):
+    def __init__(self, lesson: ScriptedClass, provider: StructuredProvider, memory=None, session_id: str | None = None, live_mode: bool = False, model_timeout: float = 8.0, teacher_id: str | None = None, student_ids: list[str] | None = None):
         self.lesson, self.provider = lesson, provider
         self.outcomes = OutcomeTracker()
         self.ccs, self.bkt, self.nudges = CCSEngine(), BKTTracker(memory=memory), NudgeEngine(provider, outcomes=self.outcomes)
@@ -38,6 +39,8 @@ class ClassRuntime:
         self.live_mode = live_mode
         self.model_timeout = model_timeout
         self.processed_event_ids: set[str] = set()
+        self.memory_agent = TeacherMemoryAgent(memory, teacher_id, student_ids or list(lesson.students))
+        self.memory_insight = None
 
     async def _model_call(self, operation: str, function, *args):
         try:
@@ -47,6 +50,17 @@ class ClassRuntime:
         except Exception as error:
             logger.warning("model call failed operation=%s provider=%s error=%s", operation, self.provider.mode, error)
             return None, {"operation": operation, "error": "provider_error", "message": str(error), "provider": self.provider.mode, "session_id": self.session_id}
+
+    async def _recall_memory(self):
+        if self.memory_insight is not None:
+            return self.memory_insight, None
+        context = self.memory_agent.context(self.lesson.concept)
+        if not context["available"]:
+            return None, None
+        insight, error = await self._model_call("teacher_memory", self.provider.synthesize_memory, self.lesson.concept, context)
+        if insight is not None:
+            self.memory_insight = insight
+        return insight, error
 
     def _window(self) -> SignalWindow:
         return SignalWindow(
@@ -160,6 +174,14 @@ class ClassRuntime:
                         "clarity_risk": risk.clarity_risk, "possible_issue": risk.possible_issue,
                         "teacher_evidence": risk.evidence, "suggested_check": risk.suggested_check,
                     }
+                    insight, memory_error = await self._recall_memory()
+                    if memory_error:
+                        yield {"kind": "model_error", "data": memory_error}
+                    if insight:
+                        strategy = insight.recommended_strategy
+                        reason = insight.rationale
+                        evidence["longitudinal_memory"] = insight.model_dump()
+                        yield {"kind": "memory_insight", "data": {**insight.model_dump(), "session_id": self.session_id}}
                     nudge, nudge_error = await self._model_call(
                         "nudge", self.provider.generate_nudge, self.lesson.concept,
                         evidence, strategy, mode, reason,
@@ -220,6 +242,14 @@ class ClassRuntime:
         selection = self.nudges.prepare(self.lesson.concept, result.score)
         if selection:
             strategy, mode, reason = selection
+            memory, memory_error = await self._recall_memory()
+            if memory_error:
+                yield {"kind": "model_error", "data": memory_error}
+            if memory:
+                strategy = memory.recommended_strategy
+                reason = memory.rationale
+                result.evidence["longitudinal_memory"] = memory.model_dump()
+                yield {"kind": "memory_insight", "data": {**memory.model_dump(), "session_id": self.session_id}}
             nudge, error = await self._model_call("nudge", self.provider.generate_nudge, self.lesson.concept, result.evidence, strategy, mode, reason)
             if error:
                 yield {"kind": "model_error", "data": error}
