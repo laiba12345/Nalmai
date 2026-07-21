@@ -23,6 +23,9 @@ The Python test suite covers:
 - two-person WebRTC signaling room capacity, duplicate participant rejection,
   offer/answer relay, disconnect cleanup, and a real-Uvicorn smoke test that
   joined teacher and student while rejecting a third participant.
+- a dedicated `/call` product surface with role-specific layouts: teacher video
+  plus live CCS/mastery/risk/nudge/transcript/poll controls, and a student call
+  view without private teacher guidance.
 
 The current automated suite contains **91 tests** and is rerun after each implementation task. Framework deprecation warnings under Python 3.14 are tracked separately from AhaLoop failures. JavaScript syntax is also checked with Node.
 

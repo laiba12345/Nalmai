@@ -62,7 +62,7 @@ The implementation follows the official [Responses API](https://developers.opena
 ## Live lecture pipeline
 
 1. For a solo lecture, choose the closest lesson/concept and click **Start live lecture**.
-2. For a two-person demo, the teacher clicks **Create as teacher**, shares the
+2. Open the dedicated **Live call** tab at `/call`. The teacher clicks **Create as teacher**, shares the
    six-character room code, and the student enters it in a second browser and
    clicks **Join as student**. The room rejects a third participant.
 3. Once both videos appear, the teacher clicks **Start live lecture**. The
@@ -77,8 +77,12 @@ The implementation follows the official [Responses API](https://developers.opena
    implemented. The teacher can confirm or correct the model judgment, and a
    later poll is reported separately as an observed outcome.
 
-For the most reliable local demonstration, open two browser windows on the same
-computer at `http://127.0.0.1:8000`. Camera/microphone access from a second
+The teacher call view keeps the confusion score, class mastery, explanation
+risk, transcript, teaching suggestions, implementation verification, and live
+poll controls visible beside the videos. The student role sees only the call.
+
+For the most reliable local demonstration, open `/call` in two browser windows on the same
+computer. Camera/microphone access from a second
 physical device normally requires serving AhaLoop over HTTPS because browsers
 restrict media capture on non-secure network origins.
 
@@ -334,7 +338,7 @@ I retained responsibility for the product and evidence decisions:
 
 ### Tests and evaluation Codex helped construct
 
-Codex helped build the current 95-test suite, including:
+Codex helped build the current 96-test suite, including:
 
 - Fixture schema, event ordering, original timestamps, and asynchronous replay.
 - Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.

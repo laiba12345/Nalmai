@@ -11,7 +11,7 @@
   <header class="topbar">
     <a class="brand" href="/"><span class="brand-mark">AL</span><span>Aha<span>Loop</span></span></a>
     <div class="lesson-meta"><span class="live-dot"></span><div><small>LIVE CLASS</small><strong id="lessonTitle">Preparing lesson…</strong></div></div>
-    <div class="controls"><button id="presentDemo" class="present-button">▶ Present demo</button><label>Scenario<select id="lessonSelect" aria-label="Choose scripted class"></select></label><label>Speed<select id="speedSelect" aria-label="Playback speed"><option value="1">1×</option><option value="3" selected>3×</option><option value="8">8×</option></select></label><button id="liveInputToggle" class="input-toggle">＋ Live student</button><button id="restartButton">↻ Replay</button></div>
+    <div class="controls"><a class="call-link" href="/call" target="_blank">Live call ↗</a><button id="presentDemo" class="present-button">▶ Present demo</button><label>Scenario<select id="lessonSelect" aria-label="Choose scripted class"></select></label><label>Speed<select id="speedSelect" aria-label="Playback speed"><option value="1">1×</option><option value="3" selected>3×</option><option value="8">8×</option></select></label><button id="liveInputToggle" class="input-toggle">＋ Live student</button><button id="restartButton">↻ Replay</button></div>
   </header>
 
   <main>
@@ -37,13 +37,6 @@
     </section>
 
     <section class="active-sessions-strip"><div><p class="eyebrow">SCHOOL PULSE</p><strong>Active sessions</strong></div><div id="activeSessions" class="session-cards"><span>Creating default session…</span></div></section>
-
-    <section class="call-studio panel">
-      <div class="call-copy"><p class="eyebrow">TWO-PERSON DEMO CALL</p><h2>Teacher + student</h2><p>Create a room in the teacher browser, then join with its code in a second tab. The teacher can analyze both audio streams through the live lecture pipeline.</p></div>
-      <div class="call-controls"><input id="callRoom" maxlength="24" placeholder="Room code" aria-label="Call room code"><button id="createCall">Create as teacher</button><button id="joinCall">Join as student</button><button id="leaveCall" class="secondary" disabled>Leave</button></div>
-      <div class="call-videos"><figure><video id="localVideo" muted autoplay playsinline></video><figcaption>You</figcaption></figure><figure><video id="remoteVideo" autoplay playsinline></video><figcaption>Other participant</figcaption></figure></div>
-      <div id="callStatus" class="call-status">No call joined · maximum 2 participants</div>
-    </section>
 
     <section class="live-studio panel">
       <div><p class="eyebrow">LIVE LECTURE INPUT</p><h2>Camera + streaming transcription</h2><p>Records short audio windows, transcribes them, and identifies teacher/student speakers.</p></div>
@@ -107,5 +100,4 @@
   <div id="toast" class="toast" role="status"></div>
   <script src="/static/app.js"></script>
   <script src="/static/live.js"></script>
-  <script src="/static/call.js"></script>
 </body></html>

@@ -241,3 +241,8 @@ def live_input(lesson_id: str, payload: LiveStudentInput):
 @app.get("/", include_in_schema=False)
 def dashboard():
     return FileResponse(PUBLIC / "index.html")
+
+
+@app.get("/call", include_in_schema=False)
+def call_page():
+    return FileResponse(PUBLIC / "call.html")

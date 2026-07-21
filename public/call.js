@@ -37,6 +37,7 @@ async function makePeer() {
     callState.remoteStream = event.streams[0];
     state.remoteStream = callState.remoteStream;
     document.querySelector('#remoteVideo').srcObject = callState.remoteStream;
+    if (callState.role === 'teacher') document.querySelector('#analysisStart').disabled = false;
     callStatus(`Connected · ${callState.role} · room ${callState.room} · 2/2 participants`, true);
   };
   peer.onconnectionstatechange = () => {
@@ -84,6 +85,9 @@ async function joinDemoCall(role) {
   if (!room) throw new Error('Enter the teacher room code');
   input.value = room;
   callState.role = role; callState.room = room;
+  document.body.dataset.role = role;
+  document.querySelector('#teacherInsights').hidden = role !== 'teacher';
+  document.querySelector('.meeting-shell').style.gridTemplateColumns = role === 'teacher' ? '' : '1fr';
   callState.participant = `${role}-${Math.random().toString(36).slice(2,7)}`;
   await ensureCallMedia();
   const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
@@ -98,6 +102,7 @@ async function joinDemoCall(role) {
 }
 
 function leaveDemoCall() {
+  if (state.capturing && typeof stopMeetingAnalysis === 'function') stopMeetingAnalysis().catch(error => toast(error.message));
   callState.socket?.close(); callState.peer?.close();
   callState.localStream?.getTracks().forEach(track => track.stop());
   Object.assign(callState, {socket:null, peer:null, localStream:null, remoteStream:null, role:null, room:null, participant:null, pendingIce:[]});
@@ -107,6 +112,9 @@ function leaveDemoCall() {
   document.querySelector('#createCall').disabled = false;
   document.querySelector('#joinCall').disabled = false;
   document.querySelector('#leaveCall').disabled = true;
+  document.querySelector('#teacherInsights').hidden = true;
+  document.querySelector('.meeting-shell').style.gridTemplateColumns = '';
+  document.body.removeAttribute('data-role');
   callStatus('No call joined · maximum 2 participants');
 }
 

@@ -737,7 +737,27 @@ audio pipeline can be demonstrated without an external meeting product.
 
 ---
 
-## Stretch tasks (only if Tasks 1-26 are done and fully working with time left)
+## Task 27 — Separate the live meeting from the analytics dashboard
+
+**Goal:** Give the two-person class its own meeting page and keep real-time
+teacher guidance visible alongside the call.
+
+**Requirements:**
+- Move call creation/join/video controls from the main dashboard to `/call`
+- Keep the main dashboard linked to the meeting without embedding it
+- Show teacher-only live transcript, CCS, mastery, explanation risk, nudges,
+  implementation verification, and poll controls beside the videos
+- Give the student role a call-focused layout without teacher guidance
+- Reuse the existing live session, audio chunk, SSE, decision, and poll APIs
+
+**Definition of done:**
+- `/` contains a call link but no embedded call controls
+- `/call` contains the two-person meeting and teacher insight surfaces
+- Full tests, frontend syntax checks, and a fresh-server route smoke pass
+
+---
+
+## Stretch tasks (only if Tasks 1-27 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT

@@ -27,9 +27,19 @@ def test_dashboard_is_served():
     assert 'id="presentDemo"' in response.text
     assert 'id="demoGuide"' in response.text
     assert "GPT-5.6 analyzes language" in response.text
+    assert 'href="/call"' in response.text
+    assert 'id="createCall"' not in response.text
+
+
+def test_two_person_call_has_its_own_teacher_insights_page():
+    response = client.get("/call")
+    assert response.status_code == 200
     assert 'id="createCall"' in response.text
     assert 'id="joinCall"' in response.text
     assert 'id="remoteVideo"' in response.text
+    assert 'id="meetingCCS"' in response.text
+    assert 'id="meetingNudge"' in response.text
+    assert "Teacher insights" in response.text
 
 def test_real_dataset_evidence_endpoint():
     response = client.get("/api/evidence/real-data")

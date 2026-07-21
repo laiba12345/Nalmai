@@ -54,7 +54,7 @@ When the final poll arrives, scroll to **Observed outcomes** if necessary.
 
 ## 2:35–2:55 — Why it is credible
 
-> The application has 95 automated tests, held-out annotation and blinded educator-evaluation workflows, and language ingestion validated against more than 30,000 TalkMoves utterance pairs. CCS and Bayesian Knowledge Tracing are deterministic; GPT-5.6 is used where language reasoning and generation are needed.
+> The application has 96 automated tests, held-out annotation and blinded educator-evaluation workflows, and language ingestion validated against more than 30,000 TalkMoves utterance pairs. CCS and Bayesian Knowledge Tracing are deterministic; GPT-5.6 is used where language reasoning and generation are needed.
 
 ## 2:55–3:00 — Finish
 
@@ -66,12 +66,12 @@ Stop recording. Do not add a second scenario, architecture tour, or live microph
 
 Use this for a live judge conversation, not the deterministic submitted video:
 
-1. Open AhaLoop in two browser windows at `http://127.0.0.1:8003`.
+1. Open the dedicated call page in two browser windows at `http://127.0.0.1:8004/call`.
 2. In the teacher window, click **Create as teacher**. A six-character room code appears.
 3. Enter that code in the second window and click **Join as student**.
 4. Wait until both windows show the remote participant and `2/2 participants`.
 5. Use headphones to prevent speaker echo.
-6. In the teacher window only, click **Start live lecture**. Both call audio streams now enter the existing transcription and diarization pipeline.
+6. In the teacher window only, click **Start analysis**. Both call audio streams now enter the existing transcription and diarization pipeline. Keep the teacher insight column visible: it shows CCS, mastery, explanation risk, transcript, and GPT-5.6 suggestions during the meeting.
 7. Let the teacher explain normally. The student should interrupt naturally with “Wait, I am confused about why a larger denominator makes a smaller piece.”
 8. Submit a live poll after the nudge, then teach the suggested strategy and submit a follow-up poll.
 9. Use **Leave** in both windows when finished.
