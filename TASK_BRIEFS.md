@@ -939,7 +939,20 @@ future live interventions without giving the model unrestricted database access.
 
 ---
 
-## Stretch tasks (only if Tasks 1-38 are done and fully working with time left)
+## Task 39 — Tighten the dashboard transcript and action-bar layout
+
+**Goal:** Remove unused white space beneath the transcript feed and keep the
+Live Call action readable at desktop and responsive widths.
+
+**Definition of done:**
+- The transcript card does not stretch to match the taller analysis stack
+- The Live Call label stays on one line with a stable minimum width
+- The header adapts at narrower widths without hiding required actions
+- UI regression, JavaScript syntax, and full-suite tests pass
+
+---
+
+## Stretch tasks (only if Tasks 1-39 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT

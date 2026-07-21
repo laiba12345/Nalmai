@@ -38,6 +38,17 @@ def test_live_call_has_identity_media_and_saved_performance_controls():
     assert ".meeting-page{overflow-y:auto" in identity_css
     assert ".meeting-shell{height:auto" in identity_css
 
+
+def test_dashboard_transcript_and_live_call_controls_have_stable_layout():
+    root = Path(__file__).parents[1]
+    css = (root / "public/live.css").read_text(encoding="utf-8")
+    html = (root / "public/index.html").read_text(encoding="utf-8")
+    assert ".live-grid { align-items:start; }" in css
+    assert ".transcript-panel { align-self:start" in css
+    assert ".call-link { display:inline-flex" in css
+    assert "min-width:86px" in css
+    assert 'class="call-link"' in html
+
 def test_dashboard_has_all_live_product_surfaces():
     root = Path(__file__).parents[1]
     html = (root / "public/index.html").read_text(encoding="utf-8")

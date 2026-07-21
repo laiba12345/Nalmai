@@ -34,3 +34,22 @@
 .implementation-verification.not_implemented { background:var(--peach); }
 @media(max-width:900px) { .live-studio { grid-template-columns:1fr 1fr; } .live-studio video { width:100%; } .live-studio #captureStatus { grid-column:1/-1; } }
 @media(max-width:900px) { .demo-guide { grid-template-columns:1fr; } }
+
+/* Prevent the transcript card from stretching to the height of the analysis
+   stack, and reserve enough intrinsic width for the Live call action. */
+.live-grid { align-items:start; }
+.transcript-panel { align-self:start; width:100%; }
+.topbar { grid-template-columns:max-content minmax(220px,1fr) max-content; gap:24px; }
+.lesson-meta { min-width:0; justify-self:center; }
+.lesson-meta div { min-width:0; }
+.lesson-meta strong { max-width:360px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.controls { flex-wrap:nowrap; min-width:max-content; }
+.call-link { display:inline-flex; align-items:center; justify-content:center; min-width:86px; white-space:nowrap; flex:none; }
+@media(max-width:1200px) {
+  .topbar { grid-template-columns:max-content 1fr; gap:16px; padding-left:18px; padding-right:18px; }
+  .lesson-meta { display:none; }
+}
+@media(max-width:760px) {
+  .topbar { height:auto; align-items:start; padding-top:12px; padding-bottom:12px; }
+  .controls { min-width:0; flex-wrap:wrap; justify-content:flex-end; }
+}
