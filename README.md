@@ -1,455 +1,205 @@
 # Nalmai
 
-Nalmai is a real-time teaching copilot that detects confusion, recommends an evidence-informed teaching move, observes the next check, and improves strategy selection within the live lesson.
+Nalmai is a real-time teaching copilot for online lessons. It transcribes a
+teacher and student, detects confusion or explanation risk, suggests a better
+teaching move, checks whether the teacher used it, generates a learning check,
+and tracks the student's concept mastery over time.
 
-> **Nalmai** is the name selected by the project owner.
+## Core features
 
-This repository follows `AGENTS.md` and the staged tasks in `TASK_BRIEFS.md`.
+- Two-person browser video call with microphone and camera controls
+- Separate teacher and student audio transcription in 10-second windows
+- Live student Confusion Confidence Score (CCS)
+- Teacher factual- and clarity-risk analysis
+- GPT-5.6 teaching suggestions and automatic three-option polls
+- Verification of suggestion implementation from later teacher speech
+- Per-student, per-concept Bayesian Knowledge Tracing (BKT)
+- SQLite progress persistence under stable pseudonymous IDs
+- Teacher Memory Agent for concept-specific, history-informed suggestions
+- Scripted presentation mode and real classroom-language validation
 
-## One-command demo
+## How it works
 
-Windows PowerShell:
-
-```powershell
-.\run_demo.ps1
+```text
+Teacher and student WebRTC audio
+              |
+              v
+gpt-4o-transcribe-diarize
+              |
+       speaker-specific text
+        /                 \
+student learning state   teacher explanation risk
+        |                 /
+        v                v
+ deterministic CCS -> GPT-5.6 teaching suggestion
+                              |
+                    automatic baseline poll
+                              |
+                 later teacher transcript
+                              |
+              implementation verification
+                              |
+                     follow-up poll
+                              |
+             BKT mastery + SQLite memory
 ```
 
-The script opens `http://127.0.0.1:8000` and starts FastAPI. On macOS/Linux:
+GPT-5.6 handles language classification, explanation-risk analysis, teaching
+suggestions, poll creation, implementation verification, and memory insights.
+CCS, BKT, thresholds, grading, and outcome calculations are deterministic
+Python code. OpenAI calls use strict Structured Outputs.
 
-```sh
-./run_demo.sh
-```
+## Run locally
 
-If dependencies have not been installed:
+Install dependencies:
 
 ```powershell
 py -m pip install -r requirements.txt
 ```
 
-## What happens live
+Create `.env` and add your API key:
 
-1. A curated lesson replays teacher speech, unsolicited student chat, and polls using original relative timestamps; the extended presentation fixture detects confusion during an ordinary explanation before any teacher question or poll.
-2. Every transcript line passes through the typed sentiment-provider boundary.
-3. CCS combines structured learning-state classification, keyword flags, response latency, unique-student breadth, and poll-miss rate with deterministic weighted sigmoids. Evidence decays with age instead of accumulating forever.
-4. Explicit poll correctness updates BKT strongly. A student's own confused language can provide lower-weight soft evidence only for that student; class-wide CCS does not change individual mastery.
-5. A language-only early warning appears at `0.40`; when confirmed CCS first crosses `0.60`, the nudge engine calls GPT‑5.6 with strict Structured Outputs. In live lessons, elevated teacher explanation risk (`0.55` or higher) can also trigger a concrete coaching suggestion. Each trigger is deduplicated until its signal resets.
-6. The single dashboard updates through Server-Sent Events without refresh: transcript, CCS gauge/components, nudge, and mastery table.
-7. BKT state is persisted to SQLite after every update. A restarted session begins from the previous ending mastery and shows the change since that prior session.
-8. An optional “Live student” drawer accepts non-scripted chat during replay. Those events enter the same runtime queue and processing function as fixture events and are visibly tagged.
-9. Every replay has its own session ID and isolated CCS, BKT, queue, and nudge state. The active-classes strip exposes simultaneous sessions without mixing their events.
-10. After a nudge, GPT-5.6 checks subsequent teacher speech for observable implementation evidence. The dashboard shows status, confidence, and a supporting transcript quote; the teacher can confirm or correct it.
-11. A bounded Teacher Memory Agent retrieves concept-specific prior mastery and teaching outcomes from SQLite, asks GPT-5.6 for a strict structured memory insight, and uses it to personalize later live suggestions. Both the main dashboard and live-call UI label when memory influenced a nudge and show the recommended strategy.
-11. The next poll is tracked separately as an observed outcome, preserving the distinction between “the strategy was implemented” and “student performance changed afterward.”
+```env
+OPENAI_API_KEY=your-key
+NALMAI_LLM_MODE=auto
+```
 
-## GPT‑5.6 configuration
-
-Put `OPENAI_API_KEY` in the repository's `.env` file before launching. The file is loaded automatically and ignored by Git. With a key, `NALMAI_LLM_MODE=auto` selects the real Responses API adapter using model `gpt-5.6` and strict JSON schemas for student learning state, explanation risk, nudge generation, and implementation verification.
+Start everything on Windows:
 
 ```powershell
-$env:OPENAI_API_KEY = "your-key"
 .\run_demo.ps1
 ```
 
-To require OpenAI and fail instead of falling back:
+On macOS or Linux:
 
-```powershell
-$env:NALMAI_LLM_MODE = "openai"
+```sh
+./run_demo.sh
 ```
 
-Without a key, the dashboard visibly reports **Deterministic demo fallback**. That offline provider implements the same validated Pydantic contracts so the demo and tests remain reproducible; it never claims its output came from GPT‑5.6.
+Open `http://127.0.0.1:8000`. The two-person lesson is at `/call`. Without an
+API key, scripted lessons use a visibly labelled deterministic fallback; live
+audio transcription requires the key.
 
-The implementation follows the official [Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses) and [GPT‑5.6 model documentation](https://developers.openai.com/api/docs/models/gpt-5.6-sol).
+## Live lesson flow
 
-## Live lecture pipeline
+1. Open `/call` in two browsers.
+2. The teacher creates a room and shares its six-character code.
+3. The student joins with a stable pseudonymous ID.
+4. The teacher starts analysis after both video streams appear.
+5. Nalmai uploads separate teacher and student audio tracks every 10 seconds.
+6. Suggestions, polls, mastery, implementation evidence, and memory insights
+   appear on the teacher screen while the student sees only student controls.
 
-1. For a solo lecture, choose the closest lesson/concept and click **Start live lecture**.
-2. Open the dedicated **Live call** tab at `/call`. The teacher clicks **Create as teacher**, shares the
-   six-character room code, and the student enters it in a second browser and
-   clicks **Join as student**. The room rejects a third participant.
-3. Once both videos appear, the teacher clicks **Start analysis**. The browser
-   records the teacher's local WebRTC audio track and the student's remote track
-   separately in parallel ten-second windows; WebRTC video/audio remains
-   peer-to-peer.
-4. Each track is uploaded with its known role and pseudonymous participant ID.
-   The server calls `gpt-4o-transcribe-diarize` with `diarized_json`, but ignores
-   its speaker labels for the two-person call because the WebRTC track is the
-   stronger identity source. The solo/mixed-microphone dashboard still uses
-   diarization and its configured teacher speaker ID.
-5. Teacher text is checked by GPT-5.6 against the strict explanation-risk
-   schema. Student text updates CCS and BKT through the existing runtime.
-6. Subsequent teacher speech is checked for evidence that the nudge was
-   implemented. The teacher can confirm or correct the model judgment, and a
-   later poll is reported separately as an observed outcome.
+Use HTTPS when joining from separate physical devices; browsers normally block
+camera and microphone access on non-localhost HTTP pages.
 
-The teacher call view keeps the confusion score, class mastery, explanation
-risk, transcript, teaching suggestions, implementation verification, and
-AI-generated learning checks visible beside the videos. The student receives
-the generated options in the call and never has to wait for the teacher to write a poll.
-
-Each participant can independently mute their microphone or disable their
-camera without leaving. Before joining, both enter a display name and stable
-**pseudonymous ID**. Student transcript evidence and poll correctness use that
-ID, so per-concept mastery persists across sessions. The teacher ID links
-implemented intervention strategies with observed next-check changes and shows
-strategy attempts, implementation counts, and mean observed deltas in the
-teacher-only call panel. These values describe recorded evidence, not a causal
-or comprehensive measure of teaching quality.
-
-For the most reliable local demonstration, open `/call` in two browser windows on the same
-computer. Camera/microphone access from a second
-physical device normally requires serving Nalmai over HTTPS because browsers
-restrict media capture on non-secure network origins.
-
-The API key stays in `.env` on the server. The capture path requires
-`OPENAI_API_KEY`; deterministic demo mode still supports scripted replays but
-cannot transcribe audio. Transcription is near-real-time and chunked, so output
-arrives after each **ten-second capture window plus upload and API latency**.
-Separate teacher/student tracks cause two transcription requests per window.
-Speaker labels in the solo/mixed-microphone path remain model estimates. Outcome deltas are observational
-and do not establish that a nudge caused learning.
-
-## Reliability and evidence boundaries
-
-- Class-wide CCS affects intervention timing only; it never directly changes
-  every learner's BKT state.
-- A poll updates only its respondents. Individual language updates only its
-  speaker and only when classified confused with probability at least `0.50`;
-  positive and neutral language is a no-op for mastery.
-- Event IDs are deduplicated, preventing one utterance from being applied twice.
-- Sentiment, explanation-risk, and nudge calls run off the event loop with an
-  eight-second bound. Transcription has a configurable 30-second bound
-  (`NALMAI_TRANSCRIPTION_TIMEOUT`). Failures emit `model_error` SSE events
-  or an explicit HTTP error; no successful model result is fabricated.
-- Legacy persisted mastery created under the former class-wide CCS rule is
-  invalidated once because its individual states cannot be reconstructed.
-- CCS exposes **evidence quality**, not confidence or probability.
-
-## Architecture
-
-### Repository layout
+## Project structure
 
 ```text
-app/          FastAPI service and CCS, BKT, LLM, session, and persistence modules
-data/classes/ Authored live-class fixtures and confusion ground truth
-data/validation_classes/ Additional authored benchmark-only scenarios
-data/outcome_pairs/ Matched authored control/reframed outcome scenarios
-data/classbank/ Local-only authenticated ClassBank transcripts and media
-data/real/    Licensed TalkMoves classroom-language validation data
-public/       Dependency-free dashboard assets
-scripts/      Reproducible evaluation utilities
-tests/        Unit, integration, API, UI-contract, and persistence tests
-validation/   Generated benchmark reports
+app/          FastAPI API, runtime, CCS, BKT, OpenAI, memory, and call logic
+public/       Dashboard and two-person call UI
+data/         Demo fixtures, validation scenarios, and licensed TalkMoves data
+scripts/      Reproducible evaluation and import utilities
+tests/        Unit, integration, API, persistence, and UI-contract tests
+validation/   Evaluation reports and documented evidence boundaries
 ```
 
-The backend intentionally lives directly in `app/`; there is no parallel `src/` tree. All automated tests live in `tests/`.
-An empty `.agents/` folder may be recreated by the local Codex environment; it is ignored and is not part of the application.
+The dashboard receives live events through Server-Sent Events. WebRTC signaling
+uses a FastAPI WebSocket, while participant media remains peer-to-peer.
 
-```text
-JSON fixture → timed async replay → FastAPI SSE → dashboard transcript
-                         │
-                         ├→ structured sentiment ─┐
-                         ├→ keyword flags         │
-                         ├→ response latency      ├→ weighted sigmoid → CCS gauge
-                         └→ poll misses ──────────┘                    │
-                                                                      ├→ spike-gated GPT‑5.6 nudge
-poll correctness ────────────────────────→ deterministic BKT ← individual language evidence
-                                                                      │
-                                                                      └→ mastery table
-```
+## Data and evaluation
 
-- `app/stream.py`: validated fixture catalog and ordered asynchronous replay.
-- `app/ccs.py`: deterministic class-level signal features and bounded sigmoid fusion; CCS drives nudges but never changes every student's mastery.
-- `app/classbank.py`: time-aligned TalkBank CHAT parsing and Nalmai conversion.
-- `app/bkt.py`: deterministic BKT with explicit and soft evidence.
-- `app/memory.py`: SQLite mastery repository with timestamped upserts and restart-safe loading.
-- `app/llm.py`: strict schemas, OpenAI Responses adapter, and labeled demo provider.
-- `app/nudges.py`: threshold crossing and once-per-spike suppression.
-- `app/runtime.py`: coherent event-to-CCS-to-BKT-to-nudge loop.
-- `app/sessions.py`: concurrent session registry and per-class runtime isolation.
-- `app/main.py`: FastAPI, SSE endpoint, health/catalog APIs, and static dashboard.
-- `public/`: responsive single-screen live product UI.
-- `data/classes/`: three curated live-demo classes.
-- `data/validation_classes/`: six benchmark-only classes spanning slow-build, poll-only, latency-only, recovery, false-alarm, and calm patterns.
+The reliable presentation mode uses authored transcript fixtures with known
+confusion points. The repository also includes the public TalkMoves test splits:
+30,401 anonymized K-12 mathematics utterance pairs under CC BY-NC-SA 4.0.
+TalkMoves validates classroom-language ingestion, not CCS accuracy, because it
+does not contain confusion or mastery labels.
 
-## Testing
+The current suite contains **113 tests**:
 
 ```powershell
-py -m pytest
+py -m pytest -q
 ```
 
-The suite verifies event order/timestamps, all nine fixtures, calm/confused CCS, sigmoid bounds, BKT correctness and CCS soft-evidence weighting, both strict OpenAI schemas, one nudge per spike, calm suppression, full runtime integration, live input, persistence, concurrent-session isolation, SSE delivery, APIs, and required dashboard surfaces.
+Detailed CCS metrics, outcome-linkage experiments, educator-rating workflow,
+real-data results, and limitations are in [EVALUATION.md](./EVALUATION.md) and
+[`validation/`](./validation/). The presentation script is in
+[DEMO.md](./DEMO.md).
 
-## Blinded educator nudge evaluation
+## Persistence and privacy
 
-Prepare a JSON list of authored or authorized/de-identified nudge items, then:
+SQLite stores pseudonymous profiles, concept mastery, and observed teaching
+outcomes in `data/nalmai.db`. The Teacher Memory Agent retrieves only the
+current concept's relevant student and teacher history; GPT-5.6 does not receive
+unrestricted database access.
 
-```powershell
-py scripts/educator_nudge_evaluation.py source-items.json packet.json
-```
+This is a prototype, not a production school system. It has no authentication,
+institutional consent workflow, encrypted student-data service, or horizontally
+scalable call infrastructure. Outcome changes are observational and do not prove
+that a suggestion caused learning. Render's free filesystem is ephemeral, so
+long-term records require persistent storage.
 
-Open `validation/educator_rating_form.html`, load `packet.json`, enter an
-anonymous rater code, and rate the packet. A small packet should take under ten
-minutes. After downloading `educator-ratings.json`, regenerate results:
+## Deployment
 
-```powershell
-py scripts/report_educator_ratings.py educator-ratings.json educator-report.json
-```
+### Render
 
-The packet hides provider identity and rejects direct identifier fields. Never
-export protected classroom text without authorization and de-identification.
-Authentic educator results are not yet collected; synthetic fixtures validate
-the workflow only. See `validation/EDUCATOR_NUDGE_EVALUATION.md`.
+Connect this repository as a Render Blueprint using `render.yaml`, add
+`OPENAI_API_KEY`, and deploy the `nalmai` web service. Render supplies the HTTPS
+origin required for remote camera and microphone access.
 
-## Held-out confusion annotation
-
-Task 22 adds a frozen-configuration annotation and evaluation path for educator
-labels that were not used to tune CCS. Run `py scripts/heldout_confusion.py
-export ...` and `py scripts/heldout_confusion.py evaluate ...`; see
-`validation/HELDOUT_CONFUSION_EVALUATION.md`. The workflow refuses calibration
-fixtures, future-poll leakage, configuration mismatches, and TalkMoves labels as
-confusion truth. Authentic held-out results remain pending.
-
-## CCS validation
-
-Run the reproducible authored-fixture backtest with:
-
-```powershell
-py scripts/backtest_ccs.py
-```
-
-Across nine authored fixtures, confirmed alerts reach **0.875 precision** and **0.269 recall**. The poll-independent early-warning path reaches **0.750 precision**, **0.577 recall**, and predicts **6 of 11** poll outcomes from the previous event without result leakage. Expanding beyond the original three scenarios exposes materially weaker recall, especially for poll-only and latency-only confusion. These are authored-fixture results, not proof of generalization; thresholds require validation on educator-labeled held-out lessons.
-
-See [validation/CCS_BACKTEST.md](./validation/CCS_BACKTEST.md) for per-fixture timelines and machine-readable detail. This is fixture behavior validation, not accuracy against real classroom confusion labels.
-
-### Confidence calibration
-
-Run `py scripts/calibrate_ccs_confidence.py` to bucket warning/confirmed events by displayed evidence quality and compare each bucket with empirical authored-window precision. The formula rewards distinct signal types, student breadth, and confirmed state rather than repeated raw evidence counts. The current authored-fixture check is explicitly uncalibrated: evidence quality is a heuristic, not a probability that an alert is correct. See [validation/CCS_CONFIDENCE_CALIBRATION.md](./validation/CCS_CONFIDENCE_CALIBRATION.md).
-
-## Outcome validation
-
-Run `py scripts/backtest_nudge_outcome.py` to replay two matched control/reframed pairs for fractions and forces. Both arms trigger at the same point and measure the immediately following poll; events and session metadata carry `nudge_applied`. In these authored pairs, mean next-poll correctness is **0.250 control** versus **1.000 reframed**, an authored **+0.750 delta**. This verifies outcome-linking and A/B scaffolding only. The improved responses were written into the scenarios, so this is **not a causal experiment** and does not establish effects on real teacher behavior or student learning. See [validation/NUDGE_OUTCOME_BACKTEST.md](./validation/NUDGE_OUTCOME_BACKTEST.md).
-
-## Simulated versus real
-
-| Component | Status |
-|---|---|
-| Teacher speech-to-text, student chat, poll timing | Pre-scripted simulation |
-| Sentiment and nudge generation | Real GPT‑5.6 when configured; visibly labeled deterministic fallback otherwise |
-| Keyword, latency, poll, CCS fusion | Real deterministic computation |
-| BKT mastery | Real deterministic probabilistic computation |
-| Mastery across restarts | SQLite persistence in `data/nalmai.db` |
-| Browser updates | Real SSE stream |
-| Student chat typed during demo | Real input through the shared runtime queue |
-| Concurrent simulated classes | Real isolated runtime sessions |
-| Raw audio, multi-teacher accounts, memory agent | Out of scope |
-
-## Real classroom data validation
-
-The repository includes the official TalkMoves public test splits under `data/real/talkmoves/`, licensed **CC BY-NC-SA 4.0** and preserved without content changes. TalkMoves contains human-transcribed, anonymized K–12 mathematics classroom language with teacher and student discourse-move annotations.
-
-Nalmai validates:
-
-- **30,401** annotated utterance pairs;
-- **23,250** teacher pairs across seven teacher talk-move labels;
-- **7,151** student pairs across five student talk-move labels;
-- required TSV schema, non-empty response coverage, speaker roles, and full label distributions;
-- API and dashboard presentation of provenance, examples, metrics, and limitations.
-
-This strengthens real-language and ingestion validation. It does not establish CCS accuracy because TalkMoves supplies discourse labels rather than confusion labels, latency, polls, or mastery outcomes. The synthetic scenarios retain known confusion ground truth for end-to-end validation.
-
-### TalkMoves sentiment proxy agreement
-
-Run `py scripts/talkmoves_sentiment_check.py` to compare classifier output with a deliberately limited discourse-to-sentiment proxy: asking for information → confused, making a claim → neutral, and providing evidence → positive. Labels without a defensible direction are excluded. On a balanced 15-utterance sample, the deterministic fallback agreed on **6/15 (0.400)** and GPT‑5.6 agreed on **10/15 (0.667)**. This is **agreement with a judgment-call proxy, not accuracy and not confusion ground truth**. See [validation/TALKMOVES_SENTIMENT_PROXY.md](./validation/TALKMOVES_SENTIMENT_PROXY.md) for the mapping, per-label results, sampled utterances, and limitations.
-
-Source: [SumnerLab/TalkMoves](https://github.com/SumnerLab/TalkMoves). Dataset paper: [Suresh et al.](https://arxiv.org/abs/2204.09652). See [`data/real/talkmoves/DATASET.md`](./data/real/talkmoves/DATASET.md) for attribution and usage boundaries.
-
-## Recorded live-class lessons with ClassBank
-
-Nalmai can import authentic ClassBank TIMSS-Math CHAT transcripts and replay them through the same runtime at their recorded utterance timestamps. Imported teacher and student turns appear in the normal transcript and CCS pipeline with a visible `RECORDED CLASSBANK` marker; session metadata retains the corpus citation and optional local media path.
-
-ClassBank requires registration, and its transcript/media server was not reachable from this build environment, so protected lessons are **not bundled or redistributed**. After downloading through your TalkBank account, run:
-
-```powershell
-py scripts/import_classbank.py data/classbank/raw --concept mathematics --media-dir data/classbank/media
-```
-
-Restart the demo and imported lessons appear in the lesson selector. See [data/classbank/README.md](./data/classbank/README.md) for acquisition, citation, privacy, and folder instructions. This integration replays human transcripts from recorded live classes; the separate browser microphone path provides chunked speech-to-text for new live sessions.
-
-## Limitations
-
-- Fixtures replace real audio and platform integrations.
-- ClassBank imports use authentic recorded-lesson transcripts, but Nalmai does not redistribute the protected media or yet transcribe its audio itself.
-- Live typed messages have no trustworthy response-latency value, so their latency contribution is zero; language and subsequent poll signals still apply normally.
-- Initial CCS weights and BKT parameters are expert defaults. CCS has been backtested against nine diverse authored fixtures, but it is not trained on deployment data; expanded-set confirmed recall is only 0.269 and displayed evidence quality remains uncalibrated.
-- CCS observes language, latency, and polls, not tone, facial expression, or silence quality.
-- Mastery is an estimate based on current evidence, never a diagnosis or fixed student trait.
-- SQLite persistence is local to this demo instance and has no authentication, roster reconciliation, or school data-retention policy.
-- Concurrent sessions share one local process and SQLite file; this is a demo of state isolation, not a horizontally scalable deployment.
-- Two-person call rooms are in-memory, unauthenticated demo signaling with a
-  hard capacity of two. They are not a replacement for Zoom/Teams, and a public
-  deployment requires HTTPS, authenticated room access, TURN infrastructure,
-  consent, and an institutional privacy policy.
-- Performance endpoints are unauthenticated in this demo. Use only pseudonymous
-  identifiers and synthetic/consented data; add access control, encryption,
-  retention/deletion workflows, and an institutional data agreement before any
-  real student deployment.
-- Automated tests mock the Responses transport; a live GPT‑5.6 call requires the user’s valid API key and account access.
-- TalkMoves is restricted to attribution, noncommercial use, and share-alike redistribution under its source license.
-
-## Free remote demo deployment
-
-The repository includes a [`render.yaml`](./render.yaml) Blueprint that deploys
-the FastAPI app, static UI, SSE stream, and WebSocket signaling together on one
-free Render web service. Render supplies HTTPS, so camera/microphone access and
-secure `wss://` signaling work from separate physical devices.
-
-1. Push this repository to GitHub.
-2. In [Render](https://dashboard.render.com/), choose **New > Blueprint** and
-   connect the repository.
-3. Confirm the `nalmai` service uses the **Free** instance.
-4. Enter `OPENAI_API_KEY` when Render requests the secret. Never commit `.env`.
-5. After deployment, open `https://<your-service>.onrender.com/call`.
-6. The teacher selects **Create teacher room** and sends the displayed room code
-   plus the `/call` URL to the student. The student enters the code and selects
-   **Join as student**.
-
-Open the URL shortly before presenting: a free instance can sleep after 15
-minutes without HTTP or WebSocket activity and its first request can be slow.
-The app stores rooms and sessions in one process, so a restart clears them.
-
-Hosting can be free, but live GPT-5.6 suggestions, AI polls, and OpenAI speech
-transcription consume the API account's paid usage. Without `OPENAI_API_KEY`,
-the text-analysis demo falls back deterministically and live audio transcription
-is disabled. The current peer connection uses a public STUN server. This works
-on many home networks, but restrictive school/corporate networks or symmetric
-NAT can require a TURN relay; STUN alone cannot guarantee every remote call.
-
-## Docker and AWS ECS deployment
-
-The production image serves the UI, API, SSE streams, and WebSocket signaling
-on port `8000` from one non-root Uvicorn worker:
+### Docker
 
 ```sh
 docker build -t nalmai .
-docker run --rm -p 8000:8000 \
-  -e OPENAI_API_KEY="your-key" \
-  nalmai
+docker run --rm -p 8000:8000 -e OPENAI_API_KEY="your-key" nalmai
 ```
 
-Open `http://localhost:8000/call`. Do not put the API key in the image or task
-definition JSON; inject it from AWS Secrets Manager or SSM Parameter Store.
-
-For ECS, configure the task and load balancer as follows:
-
-- Map container port `8000` and use `GET /api/health` for the target-group
-  health check.
-- Terminate HTTPS on an Application Load Balancer with an ACM certificate.
-  Browser media capture requires a secure origin and call signaling becomes
-  `wss://` automatically.
-- Enable WebSockets on the request path and set the ALB idle timeout longer than
-  the expected lesson duration.
-- Run exactly **one ECS task**. Rooms, active sessions, and call signaling are
-  process-local; multiple tasks can route two participants to different memory.
-- The bundled SQLite file is container-local and ephemeral. Mount EFS at
-  `/app/data` if mastery must survive task replacement, or set
-  `NALMAI_MEMORY_MODE=off` for an intentionally stateless demo.
-- Grant outbound HTTPS access so the task can reach OpenAI. No inbound port
-  other than the load balancer listener should be public.
-
-The container health check uses Python's standard library, so the slim image
-does not need `curl`. `.dockerignore` excludes `.env`, Git history, tests,
-local databases, protected ClassBank downloads, and development artifacts.
+For ECS, run one task behind an HTTPS Application Load Balancer and mount
+persistent storage at `/app/data`. See the comments and settings in
+[`Dockerfile`](./Dockerfile) and use `/api/health` for health checks.
 
 ## How I collaborated with Codex
 
-We used Codex as an iterative engineering collaborator throughout the project. We provided the product requirements and required functionalities, reviewed each implementation, tested the live experience, and identified problems. Codex helped implement and test tasks such as OpenAI integrations, confusion metrics, live transcription, persistent learning records, and more. We made the final product, scope, naming, and deployment decisions, and rejected behavior that did not match the intended educational model. Along the way, we suggested improvements and continuously changed the requirements, and Codex was consistently strong at understanding and implementing every newly added task.
+I used Codex throughout the build as an engineering and evaluation partner. I
+defined Nalmai's purpose, selected the name, changed the product requirements as
+the live experience developed, reviewed the results, and made the final scope,
+privacy, evidence, and deployment decisions.
 
-I used Codex as an implementation and evaluation partner, not as the source of the product idea, the project name, or the final authority on educational claims. I supplied the Nalmai name and goal, the staged task briefs, scope constraints, technology choices, and acceptance criteria. Codex inspected those instructions, implemented each bounded task, ran the application and tests, surfaced failures, and committed completed tasks separately so I could review the progression.
+Representative prompts and task briefs included:
 
-### Prompts and task briefs I used
-
-The collaboration started with direct prompts such as:
-
-> “I have an instruction file for the project. Build the project end to end. Make sure to test every aspect of it.”
-
-> “Implement everything; test if it’s correct.”
+> “Build the project end to end and test every aspect of it.”
 
 > “Add real data to the project for greater impact and validation.”
 
-> “Push each task as a separate commit.”
+> “Allow two people to join a live call and show suggestions to the teacher.”
 
-I then used the more precise briefs in [`TASK_BRIEFS.md`](./TASK_BRIEFS.md). Representative examples included:
+> “Apply language evidence only to the student who produced it; use class-wide
+> CCS for nudges, not individual mastery.”
 
-- Build a deterministic CCS engine from structured sentiment, keyword, latency, and poll signals, with calm/confused tests written first.
-- Implement BKT per student and concept without putting an LLM inside the mathematical update.
-- Route typed live-student messages through exactly the same queue and CCS/BKT path as replayed events.
-- Support isolated concurrent sessions while preserving the zero-setup single-class demo.
-- Expand the CCS backtest without retuning weights merely to improve reported numbers.
-- Compare TalkMoves discourse labels with a documented sentiment proxy and report “agreement,” never “accuracy.”
-- Check evidence-quality calibration and explicitly avoid a probability claim when authentic held-out evidence does not support one.
-- Add matched nudge-outcome scenarios while stating that authored improvements are not a causal experiment.
-- Import authenticated ClassBank CHAT transcripts without redistributing protected classroom data.
+Codex implemented the FastAPI runtime, dashboard, WebRTC call, OpenAI adapters,
+CCS and BKT engines, SQLite persistence, Teacher Memory Agent, Docker packaging,
+and automated tests. It also helped diagnose speaker-attribution errors,
+transcription parsing, inaccessible scrolling, diluted one-student CCS, and the
+missing connection between explanation risk and teaching suggestions.
 
-These task briefs made desired behavior, exclusions, test expectations, and claim boundaries explicit before implementation.
+I required deterministic CCS/BKT math, strict JSON schemas for model calls,
+separate task commits, honest fallback labels, and clear separation between
+authored validation and real-world evidence. I rejected class-wide mastery
+penalties and claims that authored outcome improvements prove causality. The
+full staged history is available in [TASK_BRIEFS.md](./TASK_BRIEFS.md).
 
-### What Codex implemented
-
-Codex implemented and iteratively verified:
-
-- The FastAPI service, SSE event stream, session registry, compatibility routes, and static dashboard delivery.
-- The asynchronous classroom runtime shared by authored fixtures, typed live input, and imported ClassBank transcript turns.
-- Deterministic CCS fusion, early-warning and confirmed states, time decay, unique-student breadth, evidence reporting, and alert gating.
-- Deterministic BKT updates and SQLite persistence with prior-session mastery deltas.
-- GPT‑5.6 Responses API adapters using strict Structured Outputs for learning-state classification and teaching nudges, plus an honestly labeled deterministic fallback.
-- The live dashboard: transcript, CCS components, warning state, nudge panel, mastery table, live-input controls, active-session cards, and recorded-ClassBank labels.
-- TalkMoves ingestion and provenance reporting, expanded authored validation fixtures, evidence-quality analysis, matched nudge-outcome fixtures, and ClassBank CHAT import tooling.
-- Windows and Unix one-command launch scripts, `.env` loading, documentation, evaluation reports, and the separate task-level Git history.
-
-Codex also diagnosed issues found during integration rather than hiding them—for example, a session compatibility regression, a nudge-outcome poll linked before the reframe, duplicate anonymized ClassBank participant names, and the expanded fixture set’s substantially weaker recall.
-
-### What I decided, constrained, or rejected
-
-I retained responsibility for the product and evidence decisions:
-
-- I chose the core product goal: help a teacher notice developing confusion and receive a concise re-explanation suggestion while tracking concept mastery.
-- I chose Python/FastAPI, a lightweight browser UI, SQLite, GPT‑5.6 Structured Outputs, deterministic CCS/BKT math, and separate task commits.
-- I required the demo to distinguish simulated, typed-live, recorded-live-class, and genuinely model-generated data instead of presenting all inputs as live audio.
-- I rejected the idea that TalkMoves proxy agreement could be called sentiment “accuracy,” because its human labels describe discourse moves rather than confusion.
-- I rejected post-hoc CCS retuning solely to make three authored fixtures look better. The expanded nine-fixture benchmark therefore reports the weaker recall it actually found.
-- I rejected displaying CCS evidence quality as a probability after the authored-fixture bucket analysis remained non-monotonic.
-- I rejected treating the +0.750 authored nudge-outcome delta as evidence that nudges cause learning; it validates linkage and A/B scaffolding only.
-- I decided to use ClassBank/TIMSS-Math as the path toward authentic recorded lessons, while keeping protected transcripts and media local and out of Git.
-- I chose a dual input strategy: browser microphone capture with chunked speech-to-text for the live path, plus deterministic timestamped replay for a reliable judged demo. ClassBank imports remain transcript replays and do not claim that protected source media was transcribed here.
-
-### Tests and evaluation Codex helped construct
-
-Codex helped build the current 113-test suite, including:
-
-- Fixture schema, event ordering, original timestamps, and asynchronous replay.
-- Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.
-- BKT correct/incorrect evidence, individual-language soft evidence, SQLite round trips, restart loading, and session deltas.
-- Strict GPT‑5.6 model selection and JSON schemas for both classification and nudge generation.
-- One nudge per spike, calm suppression, and end-to-end runtime emission.
-- Live input using the shared processor, API validation, SSE behavior, and visible UI tagging.
-- Concurrent-session lifecycle and no-cross-talk checks.
-- TalkMoves schema, counts, provenance, and sentiment proxy-agreement reporting.
-- Nine-fixture CCS precision/recall and leakage-free pre-poll evaluation.
-- Confidence-bucket calibration and explicit heuristic labeling.
-- Matched control/reframed outcome linkage and `nudge_applied` propagation.
-- ClassBank CHAT participants, time alignment, media metadata, conversion, catalog discovery, and production-runtime compatibility.
-
-Codex also ran real-server smoke tests outside the in-process test client, exercised a configured GPT‑5.6 lesson replay, ran the TalkMoves sample through GPT‑5.6, checked JavaScript syntax, and regenerated the reports under [`validation/`](./validation/). I reviewed the reported boundaries rather than using passing tests as evidence of real-world classroom efficacy.
+Codex helped construct the 113-test suite and the CCS, TalkMoves, outcome, and
+educator-evaluation workflows. I reviewed the reported limitations rather than
+treating passing tests as evidence of classroom efficacy.
 
 ### Required Codex feedback reference
-
-The Codex `/feedback` session ID for this collaboration is:
 
 ```text
 019f6582-86b0-7f50-8b6a-9c00b666eff6
 ```
 
-This ID identifies the Codex thread used for the implementation and evaluation collaboration described above.
-
 ## License
 
-This project is licensed under the [MIT License](./LICENSE). The bundled TalkMoves data under `data/real/talkmoves/` is licensed separately under **CC BY-NC-SA 4.0** by its original authors and remains subject to that license's attribution, noncommercial, and share-alike terms regardless of the MIT license on the code (see [`data/real/talkmoves/DATASET.md`](./data/real/talkmoves/DATASET.md)).
+Nalmai code is available under the [MIT License](./LICENSE). Bundled TalkMoves
+data remains separately licensed under CC BY-NC-SA 4.0; see
+[`data/real/talkmoves/DATASET.md`](./data/real/talkmoves/DATASET.md).
