@@ -24,6 +24,9 @@ def test_dashboard_is_served():
     assert response.status_code == 200
     assert "AhaLoop" in response.text
     assert "ClassPulse" not in response.text
+    assert 'id="presentDemo"' in response.text
+    assert 'id="demoGuide"' in response.text
+    assert "GPT-5.6 analyzes language" in response.text
 
 def test_real_dataset_evidence_endpoint():
     response = client.get("/api/evidence/real-data")

@@ -11,13 +11,22 @@
   <header class="topbar">
     <a class="brand" href="/"><span class="brand-mark">AL</span><span>Aha<span>Loop</span></span></a>
     <div class="lesson-meta"><span class="live-dot"></span><div><small>LIVE CLASS</small><strong id="lessonTitle">Preparing lesson…</strong></div></div>
-    <div class="controls"><label>Scenario<select id="lessonSelect" aria-label="Choose scripted class"></select></label><label>Speed<select id="speedSelect" aria-label="Playback speed"><option value="1">1×</option><option value="3" selected>3×</option><option value="8">8×</option></select></label><button id="liveInputToggle" class="input-toggle">＋ Live student</button><button id="restartButton">↻ Replay</button></div>
+    <div class="controls"><button id="presentDemo" class="present-button">▶ Present demo</button><label>Scenario<select id="lessonSelect" aria-label="Choose scripted class"></select></label><label>Speed<select id="speedSelect" aria-label="Playback speed"><option value="1">1×</option><option value="3" selected>3×</option><option value="8">8×</option></select></label><button id="liveInputToggle" class="input-toggle">＋ Live student</button><button id="restartButton">↻ Replay</button></div>
   </header>
 
   <main>
     <section class="hero">
       <div><p class="eyebrow">REAL-TIME TEACHING COPILOT</p><h1>See confusion.<br><em>Close the learning loop.</em></h1><p>AhaLoop detects confusion, recommends a teaching move, observes the next check, and improves what comes next.</p></div>
       <div class="provider" id="providerBadge"><i></i><span><small>INTELLIGENCE MODE</small><strong>Connecting…</strong></span></div>
+    </section>
+    <section id="demoGuide" class="demo-guide" aria-live="polite">
+      <div class="demo-guide-copy"><p class="eyebrow">45-SECOND JUDGE DEMO</p><strong id="demoPrompt">Press “Present demo” to restart the strongest story.</strong><span>GPT-5.6 analyzes language and drafts the teaching move. CCS, BKT, thresholds, and outcome calculations are deterministic code.</span></div>
+      <ol>
+        <li data-demo-step="1"><b>1</b><span>Listen<small>Live evidence arrives</small></span></li>
+        <li data-demo-step="2"><b>2</b><span>Detect<small>Confusion is corroborated</small></span></li>
+        <li data-demo-step="3"><b>3</b><span>Coach<small>Apply the GPT-5.6 nudge</small></span></li>
+        <li data-demo-step="4"><b>4</b><span>Learn<small>Observe the next poll</small></span></li>
+      </ol>
     </section>
     <section id="liveInputPanel" class="live-input-panel" hidden>
       <div><p class="eyebrow">NON-SCRIPTED INPUT</p><strong>Type as a student</strong><span>Uses the exact same CCS/BKT pipeline. Live messages are visibly tagged.</span></div>

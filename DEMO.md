@@ -1,35 +1,59 @@
-# AhaLoop demo script (3–4 minutes)
+# AhaLoop — three-minute presentation
 
-## Start
+## Before recording
 
-Run `./run_demo.ps1`. The browser opens and the Fractions class begins automatically. Point to the intelligence badge: it honestly identifies GPT‑5.6 or the deterministic demo fallback.
+1. Put an OpenAI API key in `.env` and run `./run_demo.ps1`.
+2. Confirm the badge says **GPT-5.6 · Structured Outputs**.
+3. Press **Present demo** immediately before recording.
 
-## Watch the stream
+## 0:00–0:25 — Problem and promise
 
-Teacher speech, student chat, response latency, and a poll arrive in timestamp order. Explain that this simulates an online-class transcript and poll feed; raw audio is deliberately out of scope.
+Say:
 
-Open **Live student**, type a message such as “I’m confused about why eight is not bigger,” and send it. The visibly tagged message enters the same sentiment, CCS, BKT, and nudge path as scripted chat—this part of the input is genuinely live.
+> Teachers usually discover confusion after the lesson has moved on. AhaLoop listens to live classroom evidence, detects when understanding breaks down, recommends a teaching move, and checks whether that move worked.
 
-## Show confusion detection
+Point to the four-step guide and add: “This is not a chatbot. It is a closed intervention-feedback loop.”
 
-As several students express denominator confusion and miss the poll, the CCS gauge rises. Its four component bars expose sentiment, keyword, latency, and poll evidence. The score is deterministic and bounded by a weighted sigmoid.
+## 0:25–0:55 — Live input
 
-## Show the nudge
+Point to the transcript as the fraction lesson begins.
 
-At `CCS ≥ 0.60`, one alert recommends equal-sized fraction bars. Expand “Why this fired” to show signal counts and limitations. Note that the spike gate prevents repeat alerts while confusion remains high.
+> The production input is chunked microphone audio with speech-to-text and speaker diarization. For a reliable three-minute demo, this scenario replays the same typed teacher, student, latency, and poll events at live timestamps.
 
-## Show student mastery
+Point to the intelligence badge:
 
-The poll updates each student explicitly, while CCS supplies weaker soft evidence. The BKT table changes without refresh and exposes evidence counts and confidence. Replay the class or restart the server: mastery begins from the SQLite-persisted ending state and shows a “since last session” trend.
+> GPT-5.6 classifies student language and teacher explanation risks through strict Structured Outputs. No free-form model response is parsed.
 
-## Switch scenarios
+## 0:55–1:25 — Detect confusion
 
-Choose Photosynthesis or Forces. The stream restarts with a different concept and deliberate confusion moment.
+When student messages arrive, point to the CCS panel.
 
-Open the dashboard in a second tab and start another scenario. The **Active classes** strip shows both session IDs, concepts, CCS values, and status. Each tab streams only its own transcript and mastery state.
+> AhaLoop combines student language, confusion keywords, response latency, breadth across learners, and poll misses. The score is deterministic and exposes its evidence. It is a class intervention signal, not a diagnosis or an automatic penalty to every student.
 
-## Show real-data evidence
+Briefly point to mastery: “Individual mastery changes only from evidence belonging to that learner.”
 
-Scroll to **Real-data validation**. Show that AhaLoop loads 30,401 official TalkMoves teacher/student utterance pairs and their discourse annotations. Point out the source license and boundary: real classroom language validates ingestion and discourse coverage, while the scripted streams provide known confusion, latency, and poll ground truth.
+## 1:25–2:05 — Recommend and decide
 
-Finish with: “AhaLoop helps the teacher see confusion, understand the evidence, act before the lesson moves on, and learn which intervention works best.”
+When the nudge appears, point to its strategy and evidence.
+
+> Once corroborated confusion crosses the threshold, GPT-5.6 drafts one short, strategy-specific re-explanation. Here it recommends a visual model instead of simply repeating the rule.
+
+Click **Applied**.
+
+> The teacher remains in control. AhaLoop records whether the suggestion was applied or dismissed; showing a nudge is not treated as success.
+
+## 2:05–2:35 — Observe the outcome
+
+When the final poll arrives, scroll to **Observed outcomes** if necessary.
+
+> AhaLoop links the applied teaching move to the next poll. Understanding rises from the earlier poll to the follow-up check. This is observational session evidence—not a causal claim—but it gives the system evidence about which strategy to try next.
+
+## 2:35–2:55 — Why it is credible
+
+> The application has 83 automated tests, held-out annotation and blinded educator-evaluation workflows, and language ingestion validated against more than 30,000 TalkMoves utterance pairs. CCS and Bayesian Knowledge Tracing are deterministic; GPT-5.6 is used where language reasoning and generation are needed.
+
+## 2:55–3:00 — Finish
+
+> AhaLoop helps a teacher see confusion, act before the lesson moves on, and learn which intervention works best.
+
+Stop recording. Do not add a second scenario, architecture tour, or live microphone experiment to the submitted video.

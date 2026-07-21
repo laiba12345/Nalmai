@@ -243,7 +243,7 @@ ClassBank requires registration, and its transcript/media server was not reachab
 py scripts/import_classbank.py data/classbank/raw --concept mathematics --media-dir data/classbank/media
 ```
 
-Restart the demo and imported lessons appear in the lesson selector. See [data/classbank/README.md](./data/classbank/README.md) for acquisition, citation, privacy, and folder instructions. This integration replays human transcripts from recorded live classes; microphone capture and streaming speech-to-text remain a separate implementation step.
+Restart the demo and imported lessons appear in the lesson selector. See [data/classbank/README.md](./data/classbank/README.md) for acquisition, citation, privacy, and folder instructions. This integration replays human transcripts from recorded live classes; the separate browser microphone path provides chunked speech-to-text for new live sessions.
 
 ## Limitations
 
@@ -315,11 +315,11 @@ I retained responsibility for the product and evidence decisions:
 - I rejected displaying CCS evidence quality as a probability after the authored-fixture bucket analysis remained non-monotonic.
 - I rejected treating the +0.750 authored nudge-outcome delta as evidence that nudges cause learning; it validates linkage and A/B scaffolding only.
 - I decided to use ClassBank/TIMSS-Math as the path toward authentic recorded lessons, while keeping protected transcripts and media local and out of Git.
-- I identified live microphone capture and streaming speech-to-text as the next major product step. The current ClassBank integration replays human transcripts at recorded timestamps; it does not claim to be live microphone transcription.
+- I chose a dual input strategy: browser microphone capture with chunked speech-to-text for the live path, plus deterministic timestamped replay for a reliable judged demo. ClassBank imports remain transcript replays and do not claim that protected source media was transcribed here.
 
 ### Tests and evaluation Codex helped construct
 
-Codex helped build the current 48-test suite, including:
+Codex helped build the current 83-test suite, including:
 
 - Fixture schema, event ordering, original timestamps, and asynchronous replay.
 - Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.
