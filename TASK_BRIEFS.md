@@ -70,7 +70,7 @@ soft-evidence extension. Pure deterministic code — no LLM involved here.
   ccs: float | None)` — either correctness evidence, CCS evidence, or both
   can be passed for a given update
 - Explicit evidence (correct/incorrect) should move the estimate more than
-  CCS soft evidence, per the λ weighting described in §4.2
+  individual-student language soft evidence, per the λ weighting described in §4.2
 
 **Definition of done (write these tests first):**
 - Given 10 correct answers on a concept, mastery increases

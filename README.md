@@ -138,7 +138,7 @@ JSON fixture → timed async replay → FastAPI SSE → dashboard transcript
                          ├→ response latency      ├→ weighted sigmoid → CCS gauge
                          └→ poll misses ──────────┘                    │
                                                                       ├→ spike-gated GPT‑5.6 nudge
-poll correctness ────────────────────────→ deterministic BKT ← CCS soft evidence
+poll correctness ────────────────────────→ deterministic BKT ← individual language evidence
                                                                       │
                                                                       └→ mastery table
 ```
@@ -403,11 +403,11 @@ I retained responsibility for the product and evidence decisions:
 
 ### Tests and evaluation Codex helped construct
 
-Codex helped build the current 103-test suite, including:
+Codex helped build the current 104-test suite, including:
 
 - Fixture schema, event ordering, original timestamps, and asynchronous replay.
 - Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.
-- BKT correct/incorrect evidence, CCS soft evidence, SQLite round trips, restart loading, and session deltas.
+- BKT correct/incorrect evidence, individual-language soft evidence, SQLite round trips, restart loading, and session deltas.
 - Strict GPT‑5.6 model selection and JSON schemas for both classification and nudge generation.
 - One nudge per spike, calm suppression, and end-to-end runtime emission.
 - Live input using the shared processor, API validation, SSE behavior, and visible UI tagging.

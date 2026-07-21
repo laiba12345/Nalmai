@@ -9,7 +9,7 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">AL</span><span>Aha<span>Loop</span></span></a>
+    <a class="brand" href="/"><span class="brand-mark">N</span><span>Nalmai</span></a>
     <div class="lesson-meta"><span class="live-dot"></span><div><small>LIVE CLASS</small><strong id="lessonTitle">Preparing lesson…</strong></div></div>
     <div class="controls"><a class="call-link" href="/call" target="_blank">Live call ↗</a><button id="presentDemo" class="present-button">▶ Present demo</button><label>Scenario<select id="lessonSelect" aria-label="Choose scripted class"></select></label><label>Speed<select id="speedSelect" aria-label="Playback speed"><option value="1">1×</option><option value="3" selected>3×</option><option value="8">8×</option></select></label><button id="liveInputToggle" class="input-toggle">＋ Live student</button><button id="restartButton">↻ Replay</button></div>
   </header>
@@ -36,7 +36,7 @@
       <button id="sendLiveInput">Send live</button>
     </section>
 
-    <section class="active-sessions-strip"><div><p class="eyebrow">SCHOOL PULSE</p><strong>Active sessions</strong></div><div id="activeSessions" class="session-cards"><span>Creating default session…</span></div></section>
+    <section class="active-sessions-strip"><div><p class="eyebrow">NALMAI SESSIONS</p><strong>Active classes</strong></div><div id="activeSessions" class="session-cards"><span>Creating default session…</span></div></section>
 
     <section class="live-studio panel">
       <div><p class="eyebrow">LIVE LECTURE INPUT</p><h2>Camera + streaming transcription</h2><p>Records short audio windows, transcribes them, and identifies teacher/student speakers.</p></div>
@@ -82,7 +82,7 @@
     <section class="panel mastery-panel">
       <div class="panel-head"><div><p class="eyebrow">BAYESIAN KNOWLEDGE TRACING</p><h2>Student mastery · <span id="masteryConcept">current concept</span></h2></div><div class="legend"><span><i class="secure"></i>Secure</span><span><i class="developing"></i>Developing</span><span><i class="support"></i>Needs support</span></div></div>
       <div class="table-wrap"><table id="masteryTable"><thead><tr><th>Student</th><th>Mastery estimate</th><th>Evidence</th><th>Confidence</th><th>Status</th></tr></thead><tbody><tr><td colspan="5" class="waiting">Waiting for student evidence…</td></tr></tbody></table></div>
-      <p class="model-note">BKT updates use explicit poll correctness plus lower-weight CCS soft evidence. Estimates describe observed evidence in this session, never fixed student ability.</p>
+      <p class="model-note">BKT updates use explicit poll correctness plus lower-weight individual language evidence. Class-wide CCS never changes an individual's mastery. Estimates describe observed evidence in this session, never fixed student ability.</p>
     </section>
     <section class="panel outcome-panel">
       <div class="panel-head"><div><p class="eyebrow">OBSERVED OUTCOMES</p><h2>Nudge decisions and next-poll change</h2></div></div>
