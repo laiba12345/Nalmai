@@ -32,7 +32,7 @@ py -m pip install -r requirements.txt
 2. Every transcript line passes through the typed sentiment-provider boundary.
 3. CCS combines structured learning-state classification, keyword flags, response latency, unique-student breadth, and poll-miss rate with deterministic weighted sigmoids. Evidence decays with age instead of accumulating forever.
 4. Explicit poll correctness updates BKT strongly. A student's own confused language can provide lower-weight soft evidence only for that student; class-wide CCS does not change individual mastery.
-5. A language-only early warning appears at `0.40`; when confirmed CCS first crosses `0.60`, the nudge engine calls GPT‑5.6 with strict Structured Outputs. It does not fire again until the score falls below the reset threshold.
+5. A language-only early warning appears at `0.40`; when confirmed CCS first crosses `0.60`, the nudge engine calls GPT‑5.6 with strict Structured Outputs. In live lessons, elevated teacher explanation risk (`0.55` or higher) can also trigger a concrete coaching suggestion. Each trigger is deduplicated until its signal resets.
 6. The single dashboard updates through Server-Sent Events without refresh: transcript, CCS gauge/components, nudge, and mastery table.
 7. BKT state is persisted to SQLite after every update. A restarted session begins from the previous ending mastery and shows the change since that prior session.
 8. An optional “Live student” drawer accepts non-scripted chat during replay. Those events enter the same runtime queue and processing function as fixture events and are visibly tagged.
@@ -420,7 +420,7 @@ I retained responsibility for the product and evidence decisions:
 
 ### Tests and evaluation Codex helped construct
 
-Codex helped build the current 109-test suite, including:
+Codex helped build the current 111-test suite, including:
 
 - Fixture schema, event ordering, original timestamps, and asynchronous replay.
 - Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.

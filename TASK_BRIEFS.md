@@ -912,7 +912,20 @@ simulated replay roster, so strong evidence can cross the nudge threshold.
 
 ---
 
-## Stretch tasks (only if Tasks 1-36 are done and fully working with time left)
+## Task 37 — Turn live explanation risk into a teaching suggestion
+
+**Goal:** Make an elevated teacher explanation-risk result actionable in the
+same live-call Teaching Suggestion panel used by confusion nudges.
+
+**Definition of done:**
+- Live explanation risk at or above 0.55 generates a structured teaching nudge
+- Repeated elevated windows are deduplicated until risk resets to 0.35 or below
+- Historical replay and matched-outcome trigger timelines remain unchanged
+- A baseline AI check is generated and the full automated suite passes
+
+---
+
+## Stretch tasks (only if Tasks 1-37 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT

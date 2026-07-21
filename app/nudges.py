@@ -18,10 +18,17 @@ class NudgeEngine:
         return self.provider.generate_nudge(concept, evidence, strategy, mode, reason)
 
     def prepare(self, concept: str, ccs: float) -> tuple[str, str, str] | None:
-        if ccs <= self.reset_threshold:
-            self.active_spikes.discard(concept)
+        return self._prepare_signal(concept, ccs, self.threshold, self.reset_threshold)
+
+    def prepare_risk(self, concept: str, risk: float, threshold=.55, reset_threshold=.35) -> tuple[str, str, str] | None:
+        return self._prepare_signal(f"explanation-risk:{concept}", risk, threshold, reset_threshold, concept)
+
+    def _prepare_signal(self, spike_key: str, value: float, threshold: float, reset_threshold: float,
+                        strategy_concept: str | None = None) -> tuple[str, str, str] | None:
+        if value <= reset_threshold:
+            self.active_spikes.discard(spike_key)
             return None
-        if ccs < self.threshold or concept in self.active_spikes:
+        if value < threshold or spike_key in self.active_spikes:
             return None
-        self.active_spikes.add(concept)
-        return self.outcomes.select_strategy(concept)
+        self.active_spikes.add(spike_key)
+        return self.outcomes.select_strategy(strategy_concept or spike_key)

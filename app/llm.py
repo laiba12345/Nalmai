@@ -174,7 +174,10 @@ class DemoStructuredProvider(StructuredProvider):
             "photosynthesis": "Trace a carbon atom from CO₂ into glucose with an input-output diagram; distinguish soil minerals from plant-made food.",
             "forces": "Use a low-friction puck and force arrows to separate constant velocity from acceleration.",
         }
-        reason = f"{evidence.get('confused_lines', 0)} confused-language lines, {evidence.get('poll_misses', 0)} poll misses, and {evidence.get('average_latency_seconds', 0)}s average latency."
+        if evidence.get("trigger_source") == "explanation_risk":
+            reason = f"Teacher explanation risk was elevated: {evidence.get('possible_issue', 'the explanation may need clarification')}"
+        else:
+            reason = f"{evidence.get('confused_lines', 0)} confused-language lines, {evidence.get('poll_misses', 0)} poll misses, and {evidence.get('average_latency_seconds', 0)}s average latency."
         return NudgeResult(concept=concept, trigger_reason=reason, suggested_reframing=frames.get(concept, f"Ask students to represent {concept} in a different way and explain what changed."), strategy=strategy, selection_mode=selection_mode, strategy_selection_reason=strategy_selection_reason)
 
     def analyze_explanation(self, concept: str, text: str) -> ExplanationRiskResult:

@@ -150,6 +150,47 @@ class ClassRuntime:
                             yield {"kind": "model_error", "data": poll_error}
                         else:
                             yield {"kind": "generated_poll", "data": {**poll.model_dump(), "poll_id": f"{pending.nudge_id}-followup", "stage": "followup", "nudge_id": pending.nudge_id, "session_id": self.session_id, "llm_mode": self.provider.mode}}
+            if risk is not None and self.live_mode:
+                risk_score = max(risk.factual_risk, risk.clarity_risk)
+                selection = self.nudges.prepare_risk(self.lesson.concept, risk_score)
+                if selection:
+                    strategy, mode, reason = selection
+                    evidence = {
+                        "trigger_source": "explanation_risk", "factual_risk": risk.factual_risk,
+                        "clarity_risk": risk.clarity_risk, "possible_issue": risk.possible_issue,
+                        "teacher_evidence": risk.evidence, "suggested_check": risk.suggested_check,
+                    }
+                    nudge, nudge_error = await self._model_call(
+                        "nudge", self.provider.generate_nudge, self.lesson.concept,
+                        evidence, strategy, mode, reason,
+                    )
+                    if nudge_error:
+                        yield {"kind": "model_error", "data": nudge_error}
+                    else:
+                        outcome = self.outcomes.register(
+                            self.lesson.concept, self.current_at, self.last_poll_correctness,
+                            strategy=nudge.strategy, suggestion=nudge.suggested_reframing,
+                        )
+                        yield {"kind": "nudge", "data": {
+                            **nudge.model_dump(), "nudge_id": outcome.nudge_id,
+                            "trigger_source": "explanation_risk", "evidence_quality": risk_score,
+                            "evidence": evidence,
+                            "limitations": "Explanation risk is based on one transcript window and should be treated as coaching evidence, not a definitive judgment.",
+                            "llm_mode": self.provider.mode, "session_id": self.session_id,
+                        }}
+                        baseline_poll, poll_error = await self._model_call(
+                            "baseline_poll", self.provider.generate_followup_poll,
+                            self.lesson.concept, nudge.suggested_reframing,
+                            "Observed teacher explanation risk before re-teaching.", "baseline",
+                        )
+                        if poll_error:
+                            yield {"kind": "model_error", "data": poll_error}
+                        else:
+                            yield {"kind": "generated_poll", "data": {
+                                **baseline_poll.model_dump(), "poll_id": f"{outcome.nudge_id}-baseline",
+                                "stage": "baseline", "nudge_id": outcome.nudge_id,
+                                "session_id": self.session_id, "llm_mode": self.provider.mode,
+                            }}
         if event["type"] == "chat":
             if sentiment is not None:
                 effective_label = "confused" if sentiment.confusion_probability >= .5 else sentiment.sentiment
