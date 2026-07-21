@@ -45,6 +45,16 @@ IMPLEMENTATION_SCHEMA = {
     },
     "required": ["status", "confidence", "evidence_quote", "rationale"],
 }
+FOLLOWUP_POLL_SCHEMA = {
+    "type": "object", "additionalProperties": False,
+    "properties": {
+        "concept": {"type": "string"}, "question": {"type": "string"},
+        "options": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 3},
+        "correct_index": {"type": "integer", "minimum": 0, "maximum": 2},
+        "explanation": {"type": "string"}, "checks": {"type": "string"},
+    },
+    "required": ["concept", "question", "options", "correct_index", "explanation", "checks"],
+}
 
 
 class SentimentResult(BaseModel):
@@ -81,6 +91,15 @@ class ImplementationVerificationResult(BaseModel):
     rationale: str
 
 
+class FollowupPollResult(BaseModel):
+    concept: str
+    question: str
+    options: list[str] = Field(min_length=3, max_length=3)
+    correct_index: int = Field(ge=0, le=2)
+    explanation: str
+    checks: str
+
+
 class StructuredProvider(ABC):
     mode: str
     @abstractmethod
@@ -91,6 +110,8 @@ class StructuredProvider(ABC):
     def analyze_explanation(self, concept: str, text: str) -> ExplanationRiskResult: ...
     @abstractmethod
     def verify_nudge_implementation(self, concept: str, suggestion: str, strategy: str, teacher_text: str) -> ImplementationVerificationResult: ...
+    @abstractmethod
+    def generate_followup_poll(self, concept: str, suggestion: str, teacher_text: str, stage: str = "followup") -> FollowupPollResult: ...
 
 
 class OpenAIStructuredProvider(StructuredProvider):
@@ -127,6 +148,12 @@ class OpenAIStructuredProvider(StructuredProvider):
         instructions = "Determine whether the subsequent teacher speech demonstrates the suggested teaching move. Require observable strategy evidence; wording need not match. Do not infer implementation from intent or topic overlap. Quote only supplied teacher speech. Return the strict schema."
         payload = self._request(instructions, prompt, "nudge_implementation_verification", IMPLEMENTATION_SCHEMA)
         return ImplementationVerificationResult.model_validate(payload)
+
+    def generate_followup_poll(self, concept: str, suggestion: str, teacher_text: str, stage: str = "followup") -> FollowupPollResult:
+        purpose = "baseline misconception check before the re-teach" if stage == "baseline" else "transfer check after the implemented re-teach"
+        prompt = f"Concept: {concept}\nTeaching move: {suggestion}\nAvailable classroom language: {teacher_text}\nCreate one short three-option {purpose}. It must have exactly one correct answer and avoid trick questions."
+        payload = self._request("You create fair, age-appropriate formative assessment checks. Return the strict schema.", prompt, "followup_learning_check", FOLLOWUP_POLL_SCHEMA)
+        return FollowupPollResult.model_validate(payload)
 
 
 class DemoStructuredProvider(StructuredProvider):
@@ -176,6 +203,21 @@ class DemoStructuredProvider(StructuredProvider):
             evidence_quote=teacher_text[:240] if implemented else "",
             rationale=f"Observed strategy evidence: {', '.join(matches)}." if implemented else "No observable evidence of the recommended strategy appears in this teacher segment.",
         )
+
+    def generate_followup_poll(self, concept: str, suggestion: str, teacher_text: str, stage: str = "followup") -> FollowupPollResult:
+        baseline_checks = {
+            "fractions": ("Which is greater?", ["1/4", "1/8", "They are equal"], 0, "One fourth is larger than one eighth."),
+            "forces": ("A puck moves at constant speed in a straight line. Is it accelerating?", ["Yes", "No", "Only if it is fast"], 1, "Constant velocity means no acceleration."),
+            "photosynthesis": ("What material supplies carbon for plant sugar?", ["Soil", "Carbon dioxide", "Sunlight"], 1, "Carbon dioxide supplies the carbon."),
+        }
+        followup_checks = {
+            "fractions": ("Which unit fraction has the largest piece?", ["1/3", "1/6", "1/9"], 0, "With the same whole, fewer equal pieces means each piece is larger."),
+            "forces": ("Which situation shows acceleration?", ["A puck moving steadily", "A cart changing direction", "A book resting"], 1, "Changing direction changes velocity, so the cart accelerates."),
+            "photosynthesis": ("Where does the carbon in plant sugar come from?", ["Soil minerals", "Carbon dioxide", "Sunlight"], 1, "Plants incorporate carbon from carbon dioxide into sugar."),
+        }
+        checks = baseline_checks if stage == "baseline" else followup_checks
+        question, options, correct, explanation = checks.get(concept, (f"Which statement best applies the new explanation of {concept}?", ["The first statement", "The second statement", "The third statement"], 0, "The first statement applies the explanation."))
+        return FollowupPollResult(concept=concept, question=question, options=options, correct_index=correct, explanation=explanation, checks=f"{stage.title()} conceptual check about {concept}.")
 
 
 def build_provider() -> StructuredProvider:

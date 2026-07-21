@@ -17,13 +17,16 @@ async def smoke(base_url: str) -> dict:
             student_joined = json.loads(await student.recv())
             await student.send(json.dumps({"type": "ready"}))
             relayed = json.loads(await teacher.recv())
+            await student.send(json.dumps({"type": "app_event", "payload": {"kind": "poll_response", "selected_index": 1}}))
+            app_relay = json.loads(await teacher.recv())
             async with connect(f"{base_url}/{room}/third-smoke") as third:
                 rejected = json.loads(await third.recv())
             assert teacher_joined["capacity"] == 2
             assert student_joined["peers"] == ["teacher-smoke"]
             assert relayed == {"type": "ready", "from": "student-smoke"}
+            assert app_relay == {"type": "app_event", "payload": {"kind": "poll_response", "selected_index": 1}, "from": "student-smoke"}
             assert rejected["type"] == "error" and "two participants" in rejected["message"]
-            return {"teacher": "joined", "student": "joined", "relay": "passed", "third_participant": "rejected"}
+            return {"teacher": "joined", "student": "joined", "signaling_relay": "passed", "poll_response_relay": "passed", "third_participant": "rejected"}
 
 
 def main() -> None:

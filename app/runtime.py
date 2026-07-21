@@ -141,6 +141,12 @@ class ClassRuntime:
                 else:
                     record = self.outcomes.record_implementation(pending.nudge_id, verification.status, verification.confidence, verification.evidence_quote, verification.rationale, self.current_at)
                     yield {"kind": "implementation_verification", "data": {**record.as_dict(), "session_id": self.session_id}}
+                    if verification.status == "implemented":
+                        poll, poll_error = await self._model_call("followup_poll", self.provider.generate_followup_poll, self.lesson.concept, pending.suggestion, event["text"], "followup")
+                        if poll_error:
+                            yield {"kind": "model_error", "data": poll_error}
+                        else:
+                            yield {"kind": "generated_poll", "data": {**poll.model_dump(), "poll_id": f"{pending.nudge_id}-followup", "stage": "followup", "nudge_id": pending.nudge_id, "session_id": self.session_id, "llm_mode": self.provider.mode}}
         if event["type"] == "chat":
             if sentiment is not None:
                 effective_label = "confused" if sentiment.confusion_probability >= .5 else sentiment.sentiment
@@ -176,6 +182,11 @@ class ClassRuntime:
                 return
             outcome = self.outcomes.register(self.lesson.concept, self.current_at, self.last_poll_correctness, strategy=nudge.strategy, suggestion=nudge.suggested_reframing)
             yield {"kind": "nudge", "data": {**nudge.model_dump(), "nudge_id": outcome.nudge_id, "evidence_quality": result.evidence_quality, "evidence": result.evidence, "limitations": result.limitations, "llm_mode": self.provider.mode, "session_id": self.session_id}}
+            baseline_poll, poll_error = await self._model_call("baseline_poll", self.provider.generate_followup_poll, self.lesson.concept, nudge.suggested_reframing, "Observed confusion evidence before re-teaching.", "baseline")
+            if poll_error:
+                yield {"kind": "model_error", "data": poll_error}
+            else:
+                yield {"kind": "generated_poll", "data": {**baseline_poll.model_dump(), "poll_id": f"{outcome.nudge_id}-baseline", "stage": "baseline", "nudge_id": outcome.nudge_id, "session_id": self.session_id, "llm_mode": self.provider.mode}}
 
     async def _produce_replay(self, speed: float) -> None:
         if self.live_mode:

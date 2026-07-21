@@ -757,7 +757,30 @@ teacher guidance visible alongside the call.
 
 ---
 
-## Stretch tasks (only if Tasks 1-27 are done and fully working with time left)
+## Task 28 — Generate and administer learning checks with GPT-5.6
+
+**Goal:** Remove teacher-authored poll composition from the live loop while
+preserving a measurable baseline and follow-up outcome.
+
+**Requirements:**
+- Use GPT-5.6 Structured Outputs to create a three-option conceptual baseline
+  check when a nudge fires and a transfer check after verified implementation
+- Require exactly one correct answer, an explanation, and a statement of what
+  the item checks
+- Relay options to the student call view without exposing the correct index
+- Grade the student's selection in the teacher browser and submit correctness
+  through the existing poll/BKT/outcome API
+- Show generated questions, stage, provider, response, and explanation to the teacher
+- Remove manual poll-composer controls from both live product surfaces
+
+**Definition of done:**
+- Neither `/` nor `/call` asks the teacher to write a poll question
+- Student responses enter the existing deterministic outcome pipeline
+- Structured-schema, runtime-event, signaling, UI, and full-suite tests pass
+
+---
+
+## Stretch tasks (only if Tasks 1-28 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT

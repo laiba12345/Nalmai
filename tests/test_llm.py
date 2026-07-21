@@ -1,5 +1,5 @@
 import json
-from app.llm import DemoStructuredProvider, OpenAIStructuredProvider, SENTIMENT_SCHEMA, NUDGE_SCHEMA, IMPLEMENTATION_SCHEMA
+from app.llm import DemoStructuredProvider, OpenAIStructuredProvider, SENTIMENT_SCHEMA, NUDGE_SCHEMA, IMPLEMENTATION_SCHEMA, FOLLOWUP_POLL_SCHEMA
 
 def test_demo_provider_obeys_sentiment_contract():
     result = DemoStructuredProvider().classify_sentiment("I am confused and not sure")
@@ -67,3 +67,28 @@ def test_demo_verifier_requires_strategy_evidence_in_teacher_speech():
     )
     assert implemented.status == "implemented"
     assert unrelated.status == "not_implemented"
+
+
+def test_followup_poll_generation_uses_gpt_56_strict_schema():
+    class FakeResponses:
+        def __init__(self): self.kwargs = None
+        def create(self, **kwargs):
+            self.kwargs = kwargs
+            return type("R", (), {"output_text": json.dumps({
+                "concept":"fractions", "question":"Which is greater?",
+                "options":["1/4", "1/8", "They are equal"], "correct_index":0,
+                "explanation":"Fourth-sized pieces are larger.",
+                "checks":"Whether denominator size is inversely related to unit-fraction size."
+            })})()
+    responses=FakeResponses();client=type("C",(),{"responses":responses})()
+    result=OpenAIStructuredProvider(client=client).generate_followup_poll("fractions","Use fraction bars.","The teacher drew equal fraction bars.")
+    assert result.correct_index == 0
+    assert len(result.options) == 3
+    assert responses.kwargs["text"]["format"]["strict"] is True
+    assert responses.kwargs["text"]["format"]["schema"] == FOLLOWUP_POLL_SCHEMA
+
+
+def test_demo_followup_poll_has_one_valid_correct_option():
+    result=DemoStructuredProvider().generate_followup_poll("fractions","Use fraction bars.","We drew equal bars.")
+    assert len(result.options) == 3
+    assert 0 <= result.correct_index < len(result.options)

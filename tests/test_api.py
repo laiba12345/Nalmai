@@ -39,6 +39,9 @@ def test_two_person_call_has_its_own_teacher_insights_page():
     assert 'id="remoteVideo"' in response.text
     assert 'id="meetingCCS"' in response.text
     assert 'id="meetingNudge"' in response.text
+    assert 'id="aiPollCard"' in response.text
+    assert 'id="studentPoll"' in response.text
+    assert 'id="meetingPollQuestion"' not in response.text
     assert "Teacher insights" in response.text
 
 def test_real_dataset_evidence_endpoint():

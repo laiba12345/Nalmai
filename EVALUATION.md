@@ -24,10 +24,13 @@ The Python test suite covers:
   offer/answer relay, disconnect cleanup, and a real-Uvicorn smoke test that
   joined teacher and student while rejecting a third participant.
 - a dedicated `/call` product surface with role-specific layouts: teacher video
-  plus live CCS/mastery/risk/nudge/transcript/poll controls, and a student call
+  plus live CCS/mastery/risk/nudge/transcript/AI-poll surfaces, and a student call
   view without private teacher guidance.
+- strict GPT-5.6 baseline/transfer poll schemas, generated-poll runtime events,
+  correct-answer withholding from the student payload, response relay, and
+  deterministic grading through the existing poll API.
 
-The current automated suite contains **91 tests** and is rerun after each implementation task. Framework deprecation warnings under Python 3.14 are tracked separately from AhaLoop failures. JavaScript syntax is also checked with Node.
+The current automated suite contains **98 tests** and is rerun after each implementation task. Framework deprecation warnings under Python 3.14 are tracked separately from AhaLoop failures. JavaScript syntax is also checked with Node.
 
 ## Real-data validation
 

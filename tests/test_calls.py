@@ -58,3 +58,5 @@ def test_websocket_signaling_relays_between_teacher_and_student():
             assert student.receive_json()["peers"] == ["teacher-one"]
             student.send_json({"type": "ready"})
             assert teacher.receive_json() == {"type": "ready", "from": "student-one"}
+            student.send_json({"type": "app_event", "payload": {"kind": "poll_response", "selected_index": 1}})
+            assert teacher.receive_json() == {"type": "app_event", "payload": {"kind": "poll_response", "selected_index": 1}, "from": "student-one"}

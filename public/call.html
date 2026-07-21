@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="AhaLoop two-person live teaching call">
   <title>AhaLoop — Live Call</title>
-  <link rel="stylesheet" href="/static/styles.css"><link rel="stylesheet" href="/static/meeting.css">
+  <link rel="stylesheet" href="/static/styles.css"><link rel="stylesheet" href="/static/meeting.css"><link rel="stylesheet" href="/static/poll.css">
 </head>
 <body class="meeting-page">
   <header class="meeting-header"><a class="brand" href="/"><span class="brand-mark">AL</span><span>Aha<span>Loop</span></span></a><div><small>LIVE CLASSROOM</small><strong>Two-person teaching session</strong></div><a href="/">Analytics dashboard ↗</a></header>
@@ -13,6 +13,7 @@
       <div class="meeting-toolbar"><div><p class="eyebrow">TEACHER + STUDENT</p><h1>Live classroom call</h1></div><div class="call-controls"><input id="callRoom" maxlength="24" placeholder="Room code" aria-label="Call room code"><button id="createCall">Create as teacher</button><button id="joinCall">Join as student</button><button id="leaveCall" class="secondary" disabled>Leave</button></div></div>
       <div class="meeting-videos"><figure><video id="remoteVideo" autoplay playsinline></video><figcaption>Other participant</figcaption></figure><figure class="local-tile"><video id="localVideo" muted autoplay playsinline></video><figcaption>You</figcaption></figure></div>
       <div id="callStatus" class="call-status">No call joined · maximum 2 participants</div>
+      <section id="studentPoll" class="student-poll" hidden><small>AI-GENERATED LEARNING CHECK</small><strong id="studentPollQuestion"></strong><div id="studentPollOptions"></div><p id="studentPollStatus">Choose one answer.</p></section>
     </section>
     <aside id="teacherInsights" class="teacher-insights panel" aria-label="Teacher insights" hidden>
       <div class="insight-head"><div><p class="eyebrow">TEACHER INSIGHTS</p><h2>Live guidance</h2></div><span id="meetingMode">Connecting…</span></div>
@@ -21,7 +22,7 @@
       <section id="meetingRisk" class="meeting-card"><small>EXPLANATION RISK</small><strong>Waiting for teacher speech</strong><p>No analysis has started.</p></section>
       <section id="meetingNudge" class="meeting-card nudge"><small>TEACHING SUGGESTION</small><strong>No suggestion yet</strong><p>A nudge appears when evidence crosses the threshold.</p></section>
       <section class="meeting-transcript"><div><small>LIVE TRANSCRIPT</small><span id="analysisStatus">Analysis off</span></div><div id="meetingTranscript"><p>Start analysis after both people connect.</p></div></section>
-      <div class="meeting-poll"><input id="meetingPollQuestion" placeholder="Follow-up poll question"><input id="meetingPollCorrect" type="number" min="0" value="0" aria-label="Correct responses"><span>of</span><input id="meetingPollTotal" type="number" min="1" value="1" aria-label="Total responses"><button id="meetingSendPoll" disabled>Send poll</button></div>
+      <section id="aiPollCard" class="meeting-card ai-poll"><small>AI-GENERATED POLL</small><strong>Waiting for a confirmed teaching need</strong><p>GPT-5.6 will create baseline and follow-up checks automatically.</p></section>
     </aside>
   </main>
   <div id="toast" class="toast" role="status"></div>

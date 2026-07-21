@@ -78,8 +78,9 @@ The implementation follows the official [Responses API](https://developers.opena
    later poll is reported separately as an observed outcome.
 
 The teacher call view keeps the confusion score, class mastery, explanation
-risk, transcript, teaching suggestions, implementation verification, and live
-poll controls visible beside the videos. The student role sees only the call.
+risk, transcript, teaching suggestions, implementation verification, and
+AI-generated learning checks visible beside the videos. The student receives
+the generated options in the call and never has to wait for the teacher to write a poll.
 
 For the most reliable local demonstration, open `/call` in two browser windows on the same
 computer. Camera/microphone access from a second
@@ -338,7 +339,7 @@ I retained responsibility for the product and evidence decisions:
 
 ### Tests and evaluation Codex helped construct
 
-Codex helped build the current 96-test suite, including:
+Codex helped build the current 98-test suite, including:
 
 - Fixture schema, event ordering, original timestamps, and asynchronous replay.
 - Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.

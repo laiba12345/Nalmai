@@ -61,7 +61,7 @@ async def call_signaling(websocket: WebSocket, room_id: str, participant_id: str
     try:
         while True:
             payload = await websocket.receive_json()
-            if payload.get("type") not in {"ready", "offer", "answer", "ice"}:
+            if payload.get("type") not in {"ready", "offer", "answer", "ice", "app_event"}:
                 await websocket.send_json({"type": "error", "message": "unsupported signaling message"})
                 continue
             await call_rooms.relay(room_id, participant_id, payload)

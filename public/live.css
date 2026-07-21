@@ -7,10 +7,6 @@
 .live-studio button, .nudge-actions button { border:0; border-radius:8px; padding:8px 10px; background:var(--forest); color:white; font:700 8px 'DM Sans'; cursor:pointer; }
 .live-studio button:disabled, .nudge-actions button:disabled { opacity:.45; }
 .live-studio #captureStatus { grid-column:3/-1; font-size:8px; color:var(--muted); }
-.live-poll { grid-column:1/-1; display:flex; gap:7px; align-items:center; border-top:1px solid var(--line); padding-top:9px; }
-.live-poll #pollQuestion { flex:1; }
-.live-poll #pollCorrect, .live-poll #pollTotal { width:60px; }
-.live-poll span { font-size:8px; color:var(--muted); }
 .risk-panel { padding:15px; }
 .risk-panel strong { font-size:10px; }
 .risk-panel.elevated { border-color:#e5ad61; background:#fffaf0; }

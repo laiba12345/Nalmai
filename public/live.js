@@ -174,24 +174,8 @@ async function stopLiveLecture() {
   await loadOutcomes();
 }
 
-async function sendLivePoll() {
-  if (!state.sessionId) throw new Error('Start a live lecture first');
-  const question = document.querySelector('#pollQuestion').value.trim();
-  const total = Number(document.querySelector('#pollTotal').value);
-  const correct = Number(document.querySelector('#pollCorrect').value);
-  if (!question || !Number.isInteger(total) || !Number.isInteger(correct) || total < 1 || correct < 0 || correct > total) throw new Error('Enter a question and a valid correct/total result');
-  const responses = {};
-  for (let index = 0; index < total; index++) responses[`Live learner ${index + 1}`] = index < correct;
-  const response = await fetch(`/api/sessions/${state.sessionId}/polls`, {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({question, responses})});
-  if (!response.ok) throw new Error('Could not submit live poll');
-  document.querySelector('#pollQuestion').value = '';
-  toast('Live poll submitted');
-  setTimeout(loadOutcomes, 500);
-}
-
 document.querySelector('#startLecture').onclick = () => startLiveLecture().catch(error => toast(error.message));
 document.querySelector('#stopLecture').onclick = () => stopLiveLecture().catch(error => toast(error.message));
-document.querySelector('#sendPoll').onclick = () => sendLivePoll().catch(error => toast(error.message));
 
 const originalConnectSession = connectSession;
 connectSession = function(sessionId) {

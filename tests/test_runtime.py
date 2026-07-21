@@ -153,6 +153,9 @@ def test_extended_demo_emits_verified_implementation_and_followup_outcome():
     messages = asyncio.run(_run(runtime))
     verification = next(message for message in messages if message["kind"] == "implementation_verification")
     assert verification["data"]["implementation_status"] == "implemented"
+    generated = next(message for message in messages if message["kind"] == "generated_poll")
+    assert generated["data"]["question"]
+    assert len(generated["data"]["options"]) == 3
     outcome = runtime.outcomes.snapshot()[0]
     assert outcome["baseline_correctness"] == .25
     assert outcome["next_poll_correctness"] == 1.0

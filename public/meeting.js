@@ -1,4 +1,4 @@
-const state = {callLocalStream:null, remoteStream:null, sessionId:null, source:null, capturing:false, mediaStream:null, audioContext:null, chunkOffset:0};
+const state = {callLocalStream:null, remoteStream:null, sessionId:null, source:null, capturing:false, mediaStream:null, audioContext:null, chunkOffset:0, generatedPoll:null};
 const escapeHtml = value => String(value).replace(/[&<>'"]/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[character]));
 function toast(text) { const element=document.querySelector('#toast'); element.textContent=text; element.classList.add('show'); setTimeout(()=>element.classList.remove('show'),2400); }
 
@@ -25,6 +25,36 @@ function renderMeetingNudge(data) {
   });
 }
 
+function presentGeneratedPoll(data) {
+  state.generatedPoll=data;
+  const card=document.querySelector('#aiPollCard');
+  card.className='meeting-card ai-poll active';
+  card.innerHTML=`<small>AI-GENERATED ${escapeHtml(data.stage.toUpperCase())} CHECK · ${escapeHtml(data.llm_mode)}</small><strong>${escapeHtml(data.question)}</strong><p>${data.options.map((option,index)=>`${String.fromCharCode(65+index)}. ${escapeHtml(option)}`).join('<br>')}</p><p>Waiting for the student response · ${escapeHtml(data.checks)}</p>`;
+  signal({type:'app_event',payload:{kind:'generated_poll',poll_id:data.poll_id,stage:data.stage,question:data.question,options:data.options}});
+}
+
+function showStudentPoll(data) {
+  const panel=document.querySelector('#studentPoll');panel.hidden=false;
+  document.querySelector('#studentPollQuestion').textContent=data.question;
+  document.querySelector('#studentPollStatus').textContent=`${data.stage} check · choose one answer`;
+  const options=document.querySelector('#studentPollOptions');
+  options.innerHTML=data.options.map((option,index)=>`<button data-index="${index}">${escapeHtml(option)}</button>`).join('');
+  options.querySelectorAll('button').forEach(button=>button.onclick=()=>{
+    options.querySelectorAll('button').forEach(item=>item.disabled=true);
+    button.style.borderColor='var(--teal)';document.querySelector('#studentPollStatus').textContent='Answer submitted';
+    signal({type:'app_event',payload:{kind:'poll_response',poll_id:data.poll_id,selected_index:Number(button.dataset.index)}});
+  });
+}
+
+async function gradeStudentPoll(data) {
+  const poll=state.generatedPoll;if(!poll||poll.poll_id!==data.poll_id)return;
+  const correct=data.selected_index===poll.correct_index;
+  const response=await fetch(`/api/sessions/${state.sessionId}/polls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:poll.question,responses:{Student:correct}})});
+  if(!response.ok)throw new Error('Could not record student poll response');
+  const card=document.querySelector('#aiPollCard');
+  card.insertAdjacentHTML('beforeend',`<p><b>${correct?'Correct':'Incorrect'}</b> · ${escapeHtml(poll.explanation)}</p>`);
+}
+
 function connectAnalysis(sessionId) {
   state.source?.close(); state.sessionId=sessionId;
   state.source=new EventSource(`/stream/${sessionId}?speed=1`);
@@ -34,6 +64,7 @@ function connectAnalysis(sessionId) {
   state.source.addEventListener('explanation_risk',event=>{const data=JSON.parse(event.data),panel=document.querySelector('#meetingRisk');panel.classList.toggle('elevated',Math.max(data.factual_risk,data.clarity_risk)>=.55);panel.innerHTML=`<small>EXPLANATION RISK</small><strong>${Math.round(data.factual_risk*100)}% factual · ${Math.round(data.clarity_risk*100)}% clarity</strong><p>${escapeHtml(data.possible_issue)} ${escapeHtml(data.suggested_check)}</p>`;});
   state.source.addEventListener('nudge',event=>renderMeetingNudge(JSON.parse(event.data)));
   state.source.addEventListener('implementation_verification',event=>{const data=JSON.parse(event.data),panel=document.querySelector('#meetingNudge');panel.querySelector('.implementation-check')?.remove();panel.insertAdjacentHTML('beforeend',`<p class="implementation-check"><b>Implementation: ${escapeHtml(data.implementation_status.replaceAll('_',' '))}</b> · ${Math.round((data.implementation_confidence||0)*100)}%<br>${escapeHtml(data.implementation_evidence||data.implementation_rationale)}</p>`);});
+  state.source.addEventListener('generated_poll',event=>presentGeneratedPoll(JSON.parse(event.data)));
   state.source.addEventListener('model_error',event=>toast(`${JSON.parse(event.data).operation} unavailable`));
 }
 
@@ -69,24 +100,16 @@ async function startMeetingAnalysis() {
   if(!response.ok) throw new Error('Could not start analysis');
   const session=await response.json(); connectAnalysis(session.session_id);
   state.mediaStream=buildAnalysisStream(); state.capturing=true; state.chunkOffset=0;
-  document.querySelector('#analysisStart').disabled=true;document.querySelector('#analysisStop').disabled=false;document.querySelector('#meetingSendPoll').disabled=false;document.querySelector('#analysisStatus').textContent='Recording first audio window…';recordMeetingWindow();
+  document.querySelector('#analysisStart').disabled=true;document.querySelector('#analysisStop').disabled=false;document.querySelector('#analysisStatus').textContent='Recording first audio window…';recordMeetingWindow();
 }
 
 async function stopMeetingAnalysis() {
   state.capturing=false;state.mediaStream?.getTracks().forEach(track=>track.stop());await state.audioContext?.close();
   if(state.sessionId) await fetch(`/api/sessions/${state.sessionId}/stop`,{method:'POST'});
-  document.querySelector('#analysisStart').disabled=false;document.querySelector('#analysisStop').disabled=true;document.querySelector('#meetingSendPoll').disabled=true;document.querySelector('#analysisStatus').textContent='Analysis stopped';
-}
-
-async function sendMeetingPoll() {
-  const total=Number(document.querySelector('#meetingPollTotal').value),correct=Number(document.querySelector('#meetingPollCorrect').value),question=document.querySelector('#meetingPollQuestion').value.trim();
-  if(!question||correct<0||total<1||correct>total) throw new Error('Enter a valid poll result');
-  const responses={};for(let index=0;index<total;index++)responses[`Live learner ${index+1}`]=index<correct;
-  const response=await fetch(`/api/sessions/${state.sessionId}/polls`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question,responses})});
-  if(!response.ok) throw new Error('Could not submit poll');toast('Poll submitted');
+  document.querySelector('#analysisStart').disabled=false;document.querySelector('#analysisStop').disabled=true;document.querySelector('#analysisStatus').textContent='Analysis stopped';
 }
 
 document.querySelector('#analysisStart').onclick=()=>startMeetingAnalysis().catch(error=>toast(error.message));
 document.querySelector('#analysisStop').onclick=()=>stopMeetingAnalysis().catch(error=>toast(error.message));
-document.querySelector('#meetingSendPoll').onclick=()=>sendMeetingPoll().catch(error=>toast(error.message));
+window.addEventListener('call_app_event',event=>{const data=event.detail;if(data.kind==='generated_poll'&&document.body.dataset.role==='student')showStudentPoll(data);if(data.kind==='poll_response'&&document.body.dataset.role==='teacher')gradeStudentPoll(data).catch(error=>toast(error.message));});
 initializeMeeting().catch(error=>toast(error.message));

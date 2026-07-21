@@ -72,6 +72,8 @@ async function handleSignal(message) {
     document.querySelector('#remoteVideo').srcObject = null;
     callState.remoteStream = null; state.remoteStream = null;
     callStatus(`Other participant left · room ${callState.room}`);
+  } else if (message.type === 'app_event') {
+    window.dispatchEvent(new CustomEvent('call_app_event', {detail: message.payload}));
   } else if (message.type === 'error') {
     throw new Error(message.message);
   }
