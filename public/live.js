@@ -141,7 +141,19 @@ async function startLiveLecture() {
   if (!response.ok) throw new Error('Could not create live session');
   const session = await response.json();
   connectSession(session.session_id);
-  state.mediaStream = await navigator.mediaDevices.getUserMedia({audio:true, video:true});
+  if (state.callLocalStream) {
+    const audioContext = new AudioContext();
+    const destination = audioContext.createMediaStreamDestination();
+    audioContext.createMediaStreamSource(state.callLocalStream).connect(destination);
+    if (state.remoteStream?.getAudioTracks().length) audioContext.createMediaStreamSource(state.remoteStream).connect(destination);
+    state.analysisAudioContext = audioContext;
+    state.mediaStream = new MediaStream([
+      ...destination.stream.getAudioTracks(),
+      ...state.callLocalStream.getVideoTracks().map(track => track.clone())
+    ]);
+  } else {
+    state.mediaStream = await navigator.mediaDevices.getUserMedia({audio:true, video:true});
+  }
   document.querySelector('#lecturePreview').srcObject = state.mediaStream;
   state.capturing = true; liveChunkOffset = 0;
   document.querySelector('#startLecture').disabled = true;
@@ -153,6 +165,7 @@ async function startLiveLecture() {
 async function stopLiveLecture() {
   state.capturing = false;
   state.mediaStream?.getTracks().forEach(track => track.stop());
+  await state.analysisAudioContext?.close(); state.analysisAudioContext = null;
   document.querySelector('#lecturePreview').srcObject = null;
   document.querySelector('#startLecture').disabled = false;
   document.querySelector('#stopLecture').disabled = true;

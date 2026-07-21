@@ -61,17 +61,26 @@ The implementation follows the official [Responses API](https://developers.opena
 
 ## Live lecture pipeline
 
-1. Choose the closest lesson/concept, then click **Start live lecture**.
-2. The browser requests camera and microphone permission. Video stays in the
-   local preview; standalone six-second audio windows are uploaded to FastAPI.
-3. The server calls `gpt-4o-transcribe-diarize` with `diarized_json`. Set the
+1. For a solo lecture, choose the closest lesson/concept and click **Start live lecture**.
+2. For a two-person demo, the teacher clicks **Create as teacher**, shares the
+   six-character room code, and the student enters it in a second browser and
+   clicks **Join as student**. The room rejects a third participant.
+3. Once both videos appear, the teacher clicks **Start live lecture**. The
+   browser mixes teacher and student call audio into standalone six-second
+   windows uploaded to FastAPI; WebRTC video/audio remains peer-to-peer.
+4. The server calls `gpt-4o-transcribe-diarize` with `diarized_json`. Set the
    teacher speaker ID (normally `speaker_0`) in the dashboard; all other speaker
    segments enter the student-signal path.
-4. Teacher text is checked by GPT-5.6 against the strict explanation-risk
+5. Teacher text is checked by GPT-5.6 against the strict explanation-risk
    schema. Student text updates CCS and BKT through the existing runtime.
-5. A threshold-crossing nudge includes **Applied** and **Dismissed** controls.
-   The first later poll is linked to that decision and the dashboard reports
-   the observed correctness delta.
+6. Subsequent teacher speech is checked for evidence that the nudge was
+   implemented. The teacher can confirm or correct the model judgment, and a
+   later poll is reported separately as an observed outcome.
+
+For the most reliable local demonstration, open two browser windows on the same
+computer at `http://127.0.0.1:8000`. Camera/microphone access from a second
+physical device normally requires serving AhaLoop over HTTPS because browsers
+restrict media capture on non-secure network origins.
 
 The API key stays in `.env` on the server. The capture path requires
 `OPENAI_API_KEY`; deterministic demo mode still supports scripted replays but
@@ -257,6 +266,10 @@ Restart the demo and imported lessons appear in the lesson selector. See [data/c
 - Mastery is an estimate based on current evidence, never a diagnosis or fixed student trait.
 - SQLite persistence is local to this demo instance and has no authentication, roster reconciliation, or school data-retention policy.
 - Concurrent sessions share one local process and SQLite file; this is a demo of state isolation, not a horizontally scalable deployment.
+- Two-person call rooms are in-memory, unauthenticated demo signaling with a
+  hard capacity of two. They are not a replacement for Zoom/Teams, and a public
+  deployment requires HTTPS, authenticated room access, TURN infrastructure,
+  consent, and an institutional privacy policy.
 - Automated tests mock the Responses transport; a live GPT‑5.6 call requires the user’s valid API key and account access.
 - TalkMoves is restricted to attribution, noncommercial use, and share-alike redistribution under its source license.
 
@@ -321,7 +334,7 @@ I retained responsibility for the product and evidence decisions:
 
 ### Tests and evaluation Codex helped construct
 
-Codex helped build the current 91-test suite, including:
+Codex helped build the current 95-test suite, including:
 
 - Fixture schema, event ordering, original timestamps, and asynchronous replay.
 - Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.

@@ -715,7 +715,29 @@ closed loop.
 
 ---
 
-## Stretch tasks (only if Tasks 1-25 are done and fully working with time left)
+## Task 26 — Add a two-person live demonstration call
+
+**Goal:** Let one teacher and one student join the same browser call so the live
+audio pipeline can be demonstrated without an external meeting product.
+
+**Requirements:**
+- Use browser-native WebRTC for peer-to-peer media and a FastAPI WebSocket only
+  for offer/answer/ICE signaling
+- Enforce a hard maximum of two participants per in-memory room
+- Provide teacher room creation, student join-by-code, local/remote video, call
+  status, and leave controls
+- Mix both call audio streams into the existing chunked transcription path in
+  the teacher browser; do not create a separate analysis implementation
+- Document localhost/HTTPS, privacy, authentication, and TURN limitations
+
+**Definition of done:**
+- Two signaling clients exchange messages and a third participant is rejected
+- The teacher can start the existing live lecture analysis after the peer joins
+- Full tests, JavaScript checks, and a real WebSocket server smoke test pass
+
+---
+
+## Stretch tasks (only if Tasks 1-26 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT

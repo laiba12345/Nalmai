@@ -54,10 +54,26 @@ When the final poll arrives, scroll to **Observed outcomes** if necessary.
 
 ## 2:35–2:55 — Why it is credible
 
-> The application has 91 automated tests, held-out annotation and blinded educator-evaluation workflows, and language ingestion validated against more than 30,000 TalkMoves utterance pairs. CCS and Bayesian Knowledge Tracing are deterministic; GPT-5.6 is used where language reasoning and generation are needed.
+> The application has 95 automated tests, held-out annotation and blinded educator-evaluation workflows, and language ingestion validated against more than 30,000 TalkMoves utterance pairs. CCS and Bayesian Knowledge Tracing are deterministic; GPT-5.6 is used where language reasoning and generation are needed.
 
 ## 2:55–3:00 — Finish
 
 > AhaLoop helps a teacher see confusion, act before the lesson moves on, and learn which intervention works best.
 
 Stop recording. Do not add a second scenario, architecture tour, or live microphone experiment to the submitted video.
+
+## Optional two-person live-call rehearsal
+
+Use this for a live judge conversation, not the deterministic submitted video:
+
+1. Open AhaLoop in two browser windows at `http://127.0.0.1:8003`.
+2. In the teacher window, click **Create as teacher**. A six-character room code appears.
+3. Enter that code in the second window and click **Join as student**.
+4. Wait until both windows show the remote participant and `2/2 participants`.
+5. Use headphones to prevent speaker echo.
+6. In the teacher window only, click **Start live lecture**. Both call audio streams now enter the existing transcription and diarization pipeline.
+7. Let the teacher explain normally. The student should interrupt naturally with “Wait, I am confused about why a larger denominator makes a smaller piece.”
+8. Submit a live poll after the nudge, then teach the suggested strategy and submit a follow-up poll.
+9. Use **Leave** in both windows when finished.
+
+For two physical devices, deploy behind HTTPS first; browser camera and microphone access is normally blocked on a non-localhost HTTP origin.

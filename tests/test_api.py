@@ -27,6 +27,9 @@ def test_dashboard_is_served():
     assert 'id="presentDemo"' in response.text
     assert 'id="demoGuide"' in response.text
     assert "GPT-5.6 analyzes language" in response.text
+    assert 'id="createCall"' in response.text
+    assert 'id="joinCall"' in response.text
+    assert 'id="remoteVideo"' in response.text
 
 def test_real_dataset_evidence_endpoint():
     response = client.get("/api/evidence/real-data")

@@ -5,7 +5,7 @@ import asyncio
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query, Request, status
+from fastapi import FastAPI, HTTPException, Query, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -18,6 +18,7 @@ from app.memory import build_memory
 from app.sessions import SessionRegistry
 from app.config import load_env_file
 from app.transcription import build_transcriber
+from app.calls import CallRoomRegistry, RoomFullError
 
 load_env_file()
 from pydantic import BaseModel, Field
@@ -30,6 +31,7 @@ session_registry = SessionRegistry(build_provider, build_memory)
 transcriber = build_transcriber()
 TRANSCRIPTION_TIMEOUT = float(os.getenv("CLASSPULSE_TRANSCRIPTION_TIMEOUT", "30"))
 legacy_sessions: dict[str, str] = {}
+call_rooms = CallRoomRegistry(max_participants=2)
 
 
 class LiveStudentInput(BaseModel):
@@ -41,6 +43,32 @@ class LiveStudentInput(BaseModel):
 class SessionCreate(BaseModel):
     fixture_id: str
     mode: str = "replay"
+
+
+@app.websocket("/ws/calls/{room_id}/{participant_id}")
+async def call_signaling(websocket: WebSocket, room_id: str, participant_id: str):
+    if not room_id.replace("-", "").isalnum() or not participant_id.replace("-", "").isalnum():
+        await websocket.close(code=1008, reason="room and participant IDs must be alphanumeric")
+        return
+    await websocket.accept()
+    try:
+        peers = await call_rooms.join(room_id, participant_id, websocket)
+    except (RoomFullError, ValueError) as error:
+        await websocket.send_json({"type": "error", "message": str(error)})
+        await websocket.close(code=1008, reason=str(error))
+        return
+    await websocket.send_json({"type": "joined", "room_id": room_id, "participant_id": participant_id, "peers": peers, "capacity": 2})
+    try:
+        while True:
+            payload = await websocket.receive_json()
+            if payload.get("type") not in {"ready", "offer", "answer", "ice"}:
+                await websocket.send_json({"type": "error", "message": "unsupported signaling message"})
+                continue
+            await call_rooms.relay(room_id, participant_id, payload)
+    except WebSocketDisconnect:
+        pass
+    finally:
+        await call_rooms.leave(room_id, participant_id)
 
 
 class NudgeDecision(BaseModel):

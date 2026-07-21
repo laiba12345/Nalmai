@@ -20,6 +20,9 @@ The Python test suite covers:
 - presence of the live transcript, CCS gauge, nudge panel, mastery table, and EventSource client.
 - automatic nudge-implementation verification from subsequent teacher speech, supporting evidence, manual override, visible provider failure, and separate next-poll outcomes;
 - the 72-second extended presentation fixture producing a 25% baseline, verified visual-model implementation, 100% follow-up, and an observational +75-point delta.
+- two-person WebRTC signaling room capacity, duplicate participant rejection,
+  offer/answer relay, disconnect cleanup, and a real-Uvicorn smoke test that
+  joined teacher and student while rejecting a third participant.
 
 The current automated suite contains **91 tests** and is rerun after each implementation task. Framework deprecation warnings under Python 3.14 are tracked separately from AhaLoop failures. JavaScript syntax is also checked with Node.
 
