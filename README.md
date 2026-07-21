@@ -2,7 +2,7 @@
 
 Nalmai is a real-time teaching copilot that detects confusion, recommends an evidence-informed teaching move, observes the next check, and improves strategy selection within the live lesson.
 
-> **Nalmai** is the name selected by the project owner. Legacy environment-variable aliases remain supported only so existing deployments continue to work.
+> **Nalmai** is the name selected by the project owner.
 
 This repository follows `AGENTS.md` and the staged tasks in `TASK_BRIEFS.md`.
 

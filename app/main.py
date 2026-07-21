@@ -29,7 +29,7 @@ app = FastAPI(title="Nalmai", version="1.0.0")
 app.mount("/static", StaticFiles(directory=PUBLIC), name="static")
 session_registry = SessionRegistry(build_provider, build_memory)
 transcriber = build_transcriber()
-TRANSCRIPTION_TIMEOUT = float(os.getenv("NALMAI_TRANSCRIPTION_TIMEOUT", os.getenv("CLASSPULSE_TRANSCRIPTION_TIMEOUT", "30")))
+TRANSCRIPTION_TIMEOUT = float(os.getenv("NALMAI_TRANSCRIPTION_TIMEOUT", "30"))
 legacy_sessions: dict[str, str] = {}
 call_rooms = CallRoomRegistry(max_participants=2)
 

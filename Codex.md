@@ -1,6 +1,6 @@
 You are the lead AI engineer building a hackathon-winning prototype called:
 
-CLASSROOMOS
+NALMAI
 "An AI Teaching Intelligence System"
 
 Mission:
@@ -12,7 +12,7 @@ The goal is NOT to build a generic chatbot. The goal is to build a complete AI p
 PRODUCT VISION
 ==================================================
 
-ClassroomOS solves this problem:
+Nalmai solves this problem:
 
 Teachers cannot simultaneously:
 - teach content,

@@ -504,7 +504,7 @@ routing, decision validation, outcome linkage, API behavior, and live sessions.
 ## Winning-differentiation phase (complete in order)
 
 These tasks strengthen the product itself, not the submission video or Devpost
-packaging. They are deliberately narrower than the out-of-scope ClassroomOS
+packaging. They are deliberately narrower than the out-of-scope Nalmai
 vision. Do not add a generic chatbot, lesson generator, cross-teacher memory,
 or unvalidated claims merely to make the feature list longer.
 
@@ -826,21 +826,19 @@ container suitable for a single-task ECS service.
 
 ## Task 31 — Rename the complete product to Nalmai
 
-**Goal:** Apply the project-owner-selected Nalmai name consistently without
-breaking an existing deployment.
+**Goal:** Apply the project-owner-selected Nalmai name consistently everywhere.
 
 **Requirements:**
 - Rename API metadata, UI, fixtures, scripts, documentation, Docker, and Render
-- Use `NALMAI_*` for current configuration and `data/nalmai.db` for new storage
-- Preserve pre-rename environment variables and an existing database as silent
-  migration aliases
+- Use only `NALMAI_*` configuration and `data/nalmai.db` storage identifiers
+- Remove former project names from the original design document and tests too
 - Record that the owner selected the name; make no unverified trademark claim
 - Keep the repository and runtime fully tested
 
 **Definition of done:**
 - No former user-facing product name remains
 - Nalmai API, UI, fixture, Docker, deployment, and documentation tests pass
-- Existing deployments can continue using their prior environment and database
+- No former environment, storage, fixture, package, or documentation alias remains
 - Full tests and frontend syntax checks pass
 
 ---

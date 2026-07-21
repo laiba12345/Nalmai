@@ -3,8 +3,7 @@ import sqlite3
 from uuid import uuid4
 
 from app.bkt import BKTTracker
-from app import memory as memory_module
-from app.memory import MasteryMemory, default_db_path
+from app.memory import DEFAULT_DB, MasteryMemory
 from app.llm import DemoStructuredProvider
 from app.runtime import ClassRuntime
 from app.stream import ScriptedClass
@@ -15,21 +14,8 @@ def _db_path() -> Path:
     return Path("data") / f"test-memory-{uuid4().hex}.db"
 
 
-def test_nalmai_default_preserves_an_existing_pre_rename_database(monkeypatch):
-    nalmai = _db_path()
-    legacy = _db_path()
-    try:
-        legacy.touch()
-        monkeypatch.setattr(memory_module, "DEFAULT_DB", nalmai)
-        monkeypatch.setattr(memory_module, "LEGACY_DB", legacy)
-
-        assert default_db_path() == legacy
-
-        nalmai.touch()
-        assert default_db_path() == nalmai
-    finally:
-        nalmai.unlink(missing_ok=True)
-        legacy.unlink(missing_ok=True)
+def test_default_database_uses_the_nalmai_name():
+    assert DEFAULT_DB.name == "nalmai.db"
 
 
 def test_mastery_persists_across_tracker_restart():

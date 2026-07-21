@@ -23,7 +23,6 @@ def test_dashboard_is_served():
     response = client.get("/")
     assert response.status_code == 200
     assert "Nalmai" in response.text
-    assert "AhaLoop" not in response.text
     assert 'id="presentDemo"' in response.text
     assert 'id="demoGuide"' in response.text
     assert "GPT-5.6 analyzes language" in response.text
