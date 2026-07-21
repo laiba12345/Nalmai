@@ -40,6 +40,7 @@ class ClassRuntime:
         self.model_timeout = model_timeout
         self.processed_event_ids: set[str] = set()
         self.memory_agent = TeacherMemoryAgent(memory, teacher_id, student_ids or list(lesson.students))
+        self.memory_context = self.memory_agent.context(lesson.concept)
         self.memory_insight = None
 
     async def _model_call(self, operation: str, function, *args):
@@ -54,7 +55,7 @@ class ClassRuntime:
     async def _recall_memory(self):
         if self.memory_insight is not None:
             return self.memory_insight, None
-        context = self.memory_agent.context(self.lesson.concept)
+        context = self.memory_context
         if not context["available"]:
             return None, None
         insight, error = await self._model_call("teacher_memory", self.provider.synthesize_memory, self.lesson.concept, context)

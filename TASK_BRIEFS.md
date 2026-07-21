@@ -952,7 +952,21 @@ Live Call action readable at desktop and responsive widths.
 
 ---
 
-## Stretch tasks (only if Tasks 1-39 are done and fully working with time left)
+## Task 40 — Present Teacher Memory on the main dashboard
+
+**Goal:** Make longitudinal personalization visible and explainable in the
+primary demo, not only in the two-person call.
+
+**Definition of done:**
+- The main dashboard has an explicit Teacher Memory Agent panel
+- The empty state does not imply that history exists
+- Memory insights show the summary, need, strategy, rationale, and limitation
+- Current-session updates cannot be mislabeled as prior-session memory
+- UI, JavaScript, and full-suite tests pass
+
+---
+
+## Stretch tasks (only if Tasks 1-40 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT

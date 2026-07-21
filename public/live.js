@@ -58,6 +58,18 @@ function renderExplanationRisk(data) {
   panel.innerHTML = `<p class="eyebrow">TEACHER EXPLANATION RISK</p><strong>${Math.round(data.factual_risk * 100)}% factual · ${Math.round(data.clarity_risk * 100)}% clarity</strong><p>${escapeHtml(data.possible_issue)} ${escapeHtml(data.suggested_check)}</p>`;
 }
 
+function resetMemoryPanel() {
+  const panel = document.querySelector('#memoryAgentPanel');
+  panel.className = 'panel memory-agent-panel';
+  panel.innerHTML = '<p class="eyebrow">TEACHER MEMORY AGENT</p><strong>No prior concept memory used yet</strong><p>Nalmai checks pseudonymous mastery and intervention history when a nudge is generated.</p>';
+}
+
+function renderMemoryInsight(data) {
+  const panel = document.querySelector('#memoryAgentPanel');
+  panel.className = 'panel memory-agent-panel active';
+  panel.innerHTML = `<p class="eyebrow">TEACHER MEMORY AGENT · MEMORY-INFORMED</p><strong>${escapeHtml(data.summary)}</strong><p>${escapeHtml(data.recurring_need)}</p><div class="memory-strategy"><b>Recommended strategy</b><span>${escapeHtml(data.recommended_strategy.replaceAll('_',' '))}</span></div><small>${escapeHtml(data.rationale)} ${escapeHtml(data.limitations)}</small>`;
+}
+
 async function decideNudge(nudgeId, decision, button) {
   const response = await fetch(`/api/sessions/${state.sessionId}/nudges/${nudgeId}/decision`, {
     method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({decision})
@@ -181,7 +193,9 @@ document.querySelector('#stopLecture').onclick = () => stopLiveLecture().catch(e
 const originalConnectSession = connectSession;
 connectSession = function(sessionId) {
   originalConnectSession(sessionId);
+  resetMemoryPanel();
   state.source.addEventListener('explanation_risk', event => renderExplanationRisk(JSON.parse(event.data)));
+  state.source.addEventListener('memory_insight', event => renderMemoryInsight(JSON.parse(event.data)));
   state.source.addEventListener('nudge', event => addNudgeControls(JSON.parse(event.data)));
   state.source.addEventListener('implementation_verification', event => renderImplementationVerification(JSON.parse(event.data)));
   state.source.addEventListener('event', event => {

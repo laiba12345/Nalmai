@@ -10,6 +10,12 @@
 .risk-panel { padding:15px; }
 .risk-panel strong { font-size:10px; }
 .risk-panel.elevated { border-color:#e5ad61; background:#fffaf0; }
+.memory-agent-panel { padding:15px; }
+.memory-agent-panel strong { display:block; font-size:10px; }
+.memory-agent-panel p,.memory-agent-panel small { display:block; font-size:8px; color:var(--muted); line-height:1.5; margin:4px 0; }
+.memory-agent-panel.active { border-color:#b8a9dc; background:linear-gradient(135deg,#fff,#f3f0fa); }
+.memory-strategy { display:flex; justify-content:space-between; gap:10px; margin:9px 0; padding:7px; border-radius:7px; background:white; font-size:8px; }
+.memory-strategy span { color:var(--purple); text-transform:capitalize; }
 .nudge-actions { display:flex; gap:6px; margin-top:9px; }
 .strategy-evidence { font-size:8px; line-height:1.45; background:#fff4ef; border-radius:7px; padding:7px; }
 .nudge-actions .dismiss { background:#e9ece9; color:var(--ink); }

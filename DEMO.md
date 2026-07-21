@@ -36,6 +36,10 @@ Briefly point to mastery: “Individual mastery changes only from evidence belon
 
 When the nudge appears, point to its strategy and evidence.
 
+If prior history is available, point to **Teacher Memory Agent** and explain that
+only concept-specific pseudonymous mastery and intervention outcomes are used;
+otherwise, its empty state honestly reports that no prior memory was used.
+
 > Once corroborated confusion crosses the threshold, GPT-5.6 drafts one short, strategy-specific re-explanation. Here it recommends a visual model instead of simply repeating the rule.
 
 Do not click either decision button yet. Wait for the next teacher segment.

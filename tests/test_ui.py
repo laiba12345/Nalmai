@@ -53,7 +53,7 @@ def test_dashboard_has_all_live_product_surfaces():
     root = Path(__file__).parents[1]
     html = (root / "public/index.html").read_text(encoding="utf-8")
     js = (root / "public/app.js").read_text(encoding="utf-8")
-    for required in ("transcriptFeed", "ccsGauge", "nudgePanel", "masteryTable", "realDataPanel", "liveInputToggle", "liveStudentId", "liveText", "activeSessions"):
+    for required in ("transcriptFeed", "ccsGauge", "nudgePanel", "memoryAgentPanel", "masteryTable", "realDataPanel", "liveInputToggle", "liveStudentId", "liveText", "activeSessions"):
         assert f'id="{required}"' in html
     assert "EventSource" in js
     assert "RECORDED CLASSBANK" in js
@@ -63,3 +63,7 @@ def test_dashboard_has_all_live_product_surfaces():
     assert "/api/live-input/" in js
     assert "/api/sessions" in js
     assert "/stream/" in js
+    live_js = (root / "public/live.js").read_text(encoding="utf-8")
+    assert "memory_insight" in live_js
+    assert "renderMemoryInsight" in live_js
+    assert "MEMORY-INFORMED" in live_js

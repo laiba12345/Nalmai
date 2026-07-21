@@ -38,7 +38,7 @@ py -m pip install -r requirements.txt
 8. An optional “Live student” drawer accepts non-scripted chat during replay. Those events enter the same runtime queue and processing function as fixture events and are visibly tagged.
 9. Every replay has its own session ID and isolated CCS, BKT, queue, and nudge state. The active-classes strip exposes simultaneous sessions without mixing their events.
 10. After a nudge, GPT-5.6 checks subsequent teacher speech for observable implementation evidence. The dashboard shows status, confidence, and a supporting transcript quote; the teacher can confirm or correct it.
-11. A bounded Teacher Memory Agent retrieves concept-specific prior mastery and teaching outcomes from SQLite, asks GPT-5.6 for a strict structured memory insight, and uses it to personalize later live suggestions. The UI labels when memory influenced a nudge.
+11. A bounded Teacher Memory Agent retrieves concept-specific prior mastery and teaching outcomes from SQLite, asks GPT-5.6 for a strict structured memory insight, and uses it to personalize later live suggestions. Both the main dashboard and live-call UI label when memory influenced a nudge and show the recommended strategy.
 11. The next poll is tracked separately as an observed outcome, preserving the distinction between “the strategy was implemented” and “student performance changed afterward.”
 
 ## GPT‑5.6 configuration
