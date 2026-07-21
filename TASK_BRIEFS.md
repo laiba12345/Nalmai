@@ -801,7 +801,30 @@ without charging for the web host.
 
 ---
 
-## Stretch tasks (only if Tasks 1-29 are done and fully working with time left)
+## Task 30 — Package AhaLoop for AWS ECS
+
+**Goal:** Run the complete live-call application as a secure production
+container suitable for a single-task ECS service.
+
+**Requirements:**
+- Build from a slim pinned Python base and install locked application requirements
+- Run Uvicorn as a non-root user on container port 8000
+- Include the application, browser assets, fixtures, and real-data evidence
+- Exclude local secrets, databases, protected downloads, and development files
+- Provide an application-aware container health check
+- Document ECS port mapping, ALB HTTPS/WebSockets, secrets, persistence, outbound
+  access, and the current single-task constraint
+
+**Definition of done:**
+- `Dockerfile` and `.dockerignore` are checked in and covered by tests
+- The image never embeds `OPENAI_API_KEY`
+- Full application tests pass
+- If Docker is unavailable locally, that unverified image-build boundary is
+  reported explicitly
+
+---
+
+## Stretch tasks (only if Tasks 1-30 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT

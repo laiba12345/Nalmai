@@ -306,6 +306,42 @@ is disabled. The current peer connection uses a public STUN server. This works
 on many home networks, but restrictive school/corporate networks or symmetric
 NAT can require a TURN relay; STUN alone cannot guarantee every remote call.
 
+## Docker and AWS ECS deployment
+
+The production image serves the UI, API, SSE streams, and WebSocket signaling
+on port `8000` from one non-root Uvicorn worker:
+
+```sh
+docker build -t ahaloop .
+docker run --rm -p 8000:8000 \
+  -e OPENAI_API_KEY="your-key" \
+  ahaloop
+```
+
+Open `http://localhost:8000/call`. Do not put the API key in the image or task
+definition JSON; inject it from AWS Secrets Manager or SSM Parameter Store.
+
+For ECS, configure the task and load balancer as follows:
+
+- Map container port `8000` and use `GET /api/health` for the target-group
+  health check.
+- Terminate HTTPS on an Application Load Balancer with an ACM certificate.
+  Browser media capture requires a secure origin and call signaling becomes
+  `wss://` automatically.
+- Enable WebSockets on the request path and set the ALB idle timeout longer than
+  the expected lesson duration.
+- Run exactly **one ECS task**. Rooms, active sessions, and call signaling are
+  process-local; multiple tasks can route two participants to different memory.
+- The bundled SQLite file is container-local and ephemeral. Mount EFS at
+  `/app/data` if mastery must survive task replacement, or set
+  `CLASSPULSE_MEMORY_MODE=off` for an intentionally stateless demo.
+- Grant outbound HTTPS access so the task can reach OpenAI. No inbound port
+  other than the load balancer listener should be public.
+
+The container health check uses Python's standard library, so the slim image
+does not need `curl`. `.dockerignore` excludes `.env`, Git history, tests,
+local databases, protected ClassBank downloads, and development artifacts.
+
 ## How I collaborated with Codex
 
 I used Codex as an implementation and evaluation partner, not as the source of the product idea or the final authority on educational claims. I supplied the AhaLoop goal, the staged task briefs, scope constraints, technology choices, and acceptance criteria. Codex inspected those instructions, implemented each bounded task, ran the application and tests, surfaced failures, and committed completed tasks separately so I could review the progression.
@@ -367,7 +403,7 @@ I retained responsibility for the product and evidence decisions:
 
 ### Tests and evaluation Codex helped construct
 
-Codex helped build the current 98-test suite, including:
+Codex helped build the current 102-test suite, including:
 
 - Fixture schema, event ordering, original timestamps, and asynchronous replay.
 - Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.
