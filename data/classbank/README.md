@@ -17,6 +17,6 @@ The TIMSS-Math corpus requires citation of Stigler, J. W., Gallimore, R., and Hi
 py scripts/import_classbank.py data/classbank/raw --concept mathematics --media-dir data/classbank/media
 ```
 
-Imported JSON is written to `data/classbank/processed/`. Restart AhaLoop; imported lessons then appear beside the authored demos and replay using their recorded CHAT timestamps. Their events are marked with source `classbank` and retain corpus, media, access, and citation metadata.
+Imported JSON is written to `data/classbank/processed/`. Restart Nalmai; imported lessons then appear beside the authored demos and replay using their recorded CHAT timestamps. Their events are marked with source `classbank` and retain corpus, media, access, and citation metadata.
 
 The importer does not upload recordings. Do not commit raw media, protected transcripts, imported JSON, student identifiers, or credentials.

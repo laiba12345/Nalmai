@@ -1,1 +1,1 @@
-"""AhaLoop live teaching intelligence package."""
+"""Nalmai live teaching intelligence package."""

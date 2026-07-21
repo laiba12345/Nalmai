@@ -1,6 +1,6 @@
 {
-  "id": "ahaloop-extended",
-  "title": "AhaLoop Extended Demo — Fraction Size",
+  "id": "nalmai-extended",
+  "title": "Nalmai Extended Demo — Fraction Size",
   "concept": "fractions",
   "validation": {"exclude_from_ccs_backtest": true, "reason": "Presentation timing duplicates the authored fractions misconception and is not an independent benchmark case."},
   "students": ["Sarah", "Marcus", "Priya", "Leo"],

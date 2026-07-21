@@ -5,10 +5,10 @@ def test_docker_image_runs_the_complete_service_as_non_root():
     dockerfile = Path("Dockerfile").read_text(encoding="utf-8")
 
     assert dockerfile.startswith("FROM python:3.13.5-slim")
-    assert "COPY --chown=ahaloop:ahaloop app ./app" in dockerfile
-    assert "COPY --chown=ahaloop:ahaloop public ./public" in dockerfile
-    assert "COPY --chown=ahaloop:ahaloop data ./data" in dockerfile
-    assert "USER ahaloop" in dockerfile
+    assert "COPY --chown=nalmai:nalmai app ./app" in dockerfile
+    assert "COPY --chown=nalmai:nalmai public ./public" in dockerfile
+    assert "COPY --chown=nalmai:nalmai data ./data" in dockerfile
+    assert "USER nalmai" in dockerfile
     assert "EXPOSE 8000" in dockerfile
     assert '"--workers", "1"' in dockerfile
     assert "/api/health" in dockerfile

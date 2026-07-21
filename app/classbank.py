@@ -1,4 +1,4 @@
-"""Import time-aligned TalkBank CHAT classroom transcripts into AhaLoop."""
+"""Import time-aligned TalkBank CHAT classroom transcripts into Nalmai."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-# AhaLoop — three-minute presentation
+# Nalmai — three-minute presentation
 
 ## Before recording
 
@@ -10,7 +10,7 @@
 
 Say:
 
-> Teachers usually discover confusion after the lesson has moved on. AhaLoop listens to live classroom evidence, detects when understanding breaks down, recommends a teaching move, and checks whether that move worked.
+> Teachers usually discover confusion after the lesson has moved on. Nalmai listens to live classroom evidence, detects when understanding breaks down, recommends a teaching move, and checks whether that move worked.
 
 Point to the four-step guide and add: “This is not a chatbot. It is a closed intervention-feedback loop.”
 
@@ -28,7 +28,7 @@ Point to the intelligence badge:
 
 First point to **Teacher Explanation Risk** when the unsupported rule is detected. Then, as unsolicited student messages arrive before any poll, point to the CCS panel.
 
-> AhaLoop first identifies that the explanation may create confusion because a rule was stated without conceptual support. Student language then independently confirms a problem before any formal check. The later poll corroborates the signal; it does not create it. CCS is deterministic and exposes its evidence.
+> Nalmai first identifies that the explanation may create confusion because a rule was stated without conceptual support. Student language then independently confirms a problem before any formal check. The later poll corroborates the signal; it does not create it. CCS is deterministic and exposes its evidence.
 
 Briefly point to mastery: “Individual mastery changes only from evidence belonging to that learner.”
 
@@ -40,7 +40,7 @@ When the nudge appears, point to its strategy and evidence.
 
 Do not click either decision button yet. Wait for the next teacher segment.
 
-> Showing a nudge is not treated as success. AhaLoop checks subsequent teacher speech for observable evidence that the recommended strategy was actually used.
+> Showing a nudge is not treated as success. Nalmai checks subsequent teacher speech for observable evidence that the recommended strategy was actually used.
 
 When **Implementation: implemented** appears, point to its evidence quote and confidence:
 
@@ -50,15 +50,15 @@ When **Implementation: implemented** appears, point to its evidence quote and co
 
 When the final poll arrives, scroll to **Observed outcomes** if necessary.
 
-> AhaLoop separately links the verified teaching move to the next poll. Understanding rises from the earlier poll to the follow-up check. Implementation evidence answers “did the teacher do it?”; the poll answers “what happened next?” This remains observational evidence, not a causal claim.
+> Nalmai separately links the verified teaching move to the next poll. Understanding rises from the earlier poll to the follow-up check. Implementation evidence answers “did the teacher do it?”; the poll answers “what happened next?” This remains observational evidence, not a causal claim.
 
 ## 2:35–2:55 — Why it is credible
 
-> The application has 102 automated tests, held-out annotation and blinded educator-evaluation workflows, and language ingestion validated against more than 30,000 TalkMoves utterance pairs. CCS and Bayesian Knowledge Tracing are deterministic; GPT-5.6 is used where language reasoning and generation are needed.
+> The application has 103 automated tests, held-out annotation and blinded educator-evaluation workflows, and language ingestion validated against more than 30,000 TalkMoves utterance pairs. CCS and Bayesian Knowledge Tracing are deterministic; GPT-5.6 is used where language reasoning and generation are needed.
 
 ## 2:55–3:00 — Finish
 
-> AhaLoop helps a teacher see confusion, act before the lesson moves on, and learn which intervention works best.
+> Nalmai helps a teacher see confusion, act before the lesson moves on, and learn which intervention works best.
 
 Stop recording. Do not add a second scenario, architecture tour, or live microphone experiment to the submitted video.
 

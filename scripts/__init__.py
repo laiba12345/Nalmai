@@ -1,1 +1,1 @@
-"""Reproducible AhaLoop evaluation scripts."""
+"""Reproducible Nalmai evaluation scripts."""

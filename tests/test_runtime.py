@@ -149,7 +149,7 @@ def test_teacher_followup_emits_nudge_implementation_verification():
 
 
 def test_extended_demo_emits_verified_implementation_and_followup_outcome():
-    runtime = ClassRuntime(ScriptedClass.load("ahaloop_extended"), DemoStructuredProvider())
+    runtime = ClassRuntime(ScriptedClass.load("nalmai_extended"), DemoStructuredProvider())
     messages = asyncio.run(_run(runtime))
     verification = next(message for message in messages if message["kind"] == "implementation_verification")
     assert verification["data"]["implementation_status"] == "implemented"

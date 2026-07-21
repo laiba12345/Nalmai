@@ -13,7 +13,7 @@ from app.outcomes import OutcomeTracker
 from app.transcription import DiarizedSegment
 from app.stream import ScriptedClass, replay_events
 
-logger = logging.getLogger("classpulse.runtime")
+logger = logging.getLogger("nalmai.runtime")
 
 
 class ClassRuntime:

@@ -1,4 +1,4 @@
-# AhaLoop evaluation
+# Nalmai evaluation
 
 ## Automated coverage of behavior
 
@@ -30,7 +30,7 @@ The Python test suite covers:
   correct-answer withholding from the student payload, response relay, and
   deterministic grading through the existing poll API.
 
-The current automated suite contains **102 tests** and is rerun after each implementation task. Framework deprecation warnings under Python 3.14 are tracked separately from AhaLoop failures. JavaScript syntax is also checked with Node.
+The current automated suite contains **103 tests** and is rerun after each implementation task. Framework deprecation warnings under Python 3.14 are tracked separately from Nalmai failures. JavaScript syntax is also checked with Node.
 
 ## Real-data validation
 

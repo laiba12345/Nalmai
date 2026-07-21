@@ -177,7 +177,7 @@ stats across sessions) but scoped down to what's demoable: persisted
 mastery, not a separate style-tagging subsystem.
 
 **Constraints:**
-- New `app/memory.py` wrapping a SQLite file (e.g. `data/classpulse.db`),
+- New `app/memory.py` wrapping a SQLite file (e.g. `data/nalmai.db`),
   storing `(student_id, concept) -> MasteryState` plus a timestamp per
   update
 - `BKTTracker` loads prior state on construction and `memory.py` persists
@@ -417,7 +417,7 @@ suggested reframing changes the outcome that follows it.
 
 ## Task 14 — Import recorded live-class lessons from ClassBank
 
-**Goal:** Let AhaLoop operate on authentic recorded classroom
+**Goal:** Let Nalmai operate on authentic recorded classroom
 transcripts rather than only authored demo fixtures, while preserving the
 existing one-command demo and respecting ClassBank access rules.
 
@@ -510,11 +510,11 @@ or unvalidated claims merely to make the feature list longer.
 
 ## Task 20 — Close the intervention feedback loop
 
-**Goal:** Make AhaLoop improve which kind of intervention it recommends
+**Goal:** Make Nalmai improve which kind of intervention it recommends
 from the teacher's decision and the next observed poll, rather than only
 recording those outcomes after the fact.
 
-**Why this matters:** The distinctive product claim should be: AhaLoop not
+**Why this matters:** The distinctive product claim should be: Nalmai not
 only detects confusion and suggests an intervention; it records whether the
 teacher applied it and whether the next check improved, then uses that evidence
 when choosing a later intervention strategy in the same session.
@@ -801,7 +801,7 @@ without charging for the web host.
 
 ---
 
-## Task 30 — Package AhaLoop for AWS ECS
+## Task 30 — Package Nalmai for AWS ECS
 
 **Goal:** Run the complete live-call application as a secure production
 container suitable for a single-task ECS service.
@@ -824,7 +824,28 @@ container suitable for a single-task ECS service.
 
 ---
 
-## Stretch tasks (only if Tasks 1-30 are done and fully working with time left)
+## Task 31 — Rename the complete product to Nalmai
+
+**Goal:** Apply the project-owner-selected Nalmai name consistently without
+breaking an existing deployment.
+
+**Requirements:**
+- Rename API metadata, UI, fixtures, scripts, documentation, Docker, and Render
+- Use `NALMAI_*` for current configuration and `data/nalmai.db` for new storage
+- Preserve pre-rename environment variables and an existing database as silent
+  migration aliases
+- Record that the owner selected the name; make no unverified trademark claim
+- Keep the repository and runtime fully tested
+
+**Definition of done:**
+- No former user-facing product name remains
+- Nalmai API, UI, fixture, Docker, deployment, and documentation tests pass
+- Existing deployments can continue using their prior environment and database
+- Full tests and frontend syntax checks pass
+
+---
+
+## Stretch tasks (only if Tasks 1-31 are done and fully working with time left)
 
 - §4.2b Independent Outcome Verification: one follow-up check question,
   graded separately from CCS, feeding a real evidence point into BKT

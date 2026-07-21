@@ -221,7 +221,7 @@ class DemoStructuredProvider(StructuredProvider):
 
 
 def build_provider() -> StructuredProvider:
-    requested = os.getenv("CLASSPULSE_LLM_MODE", "auto").lower()
+    requested = os.getenv("NALMAI_LLM_MODE", os.getenv("CLASSPULSE_LLM_MODE", "auto")).lower()
     if requested == "openai" or (requested == "auto" and os.getenv("OPENAI_API_KEY")):
         return OpenAIStructuredProvider()
     return DemoStructuredProvider()

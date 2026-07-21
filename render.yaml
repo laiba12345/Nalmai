@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: ahaloop
+    name: nalmai
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
@@ -12,4 +12,3 @@ services:
         value: 3.13.5
       - key: OPENAI_API_KEY
         sync: false
-

@@ -1,8 +1,8 @@
-# AhaLoop
+# Nalmai
 
-AhaLoop is a real-time teaching copilot that detects confusion, recommends an evidence-informed teaching move, observes the next check, and improves strategy selection within the live lesson.
+Nalmai is a real-time teaching copilot that detects confusion, recommends an evidence-informed teaching move, observes the next check, and improves strategy selection within the live lesson.
 
-> Naming note: AhaLoop was formerly developed under the name **ClassPulse**. Internal compatibility identifiers may retain the former lowercase name so existing data and environment configuration continue to work.
+> **Nalmai** is the name selected by the project owner. Legacy environment-variable aliases remain supported only so existing deployments continue to work.
 
 This repository follows `AGENTS.md` and the staged tasks in `TASK_BRIEFS.md`.
 
@@ -42,7 +42,7 @@ py -m pip install -r requirements.txt
 
 ## GPT‑5.6 configuration
 
-Put `OPENAI_API_KEY` in the repository's `.env` file before launching. The file is loaded automatically and ignored by Git. With a key, `CLASSPULSE_LLM_MODE=auto` selects the real Responses API adapter using model `gpt-5.6` and strict JSON schemas for student learning state, explanation risk, nudge generation, and implementation verification.
+Put `OPENAI_API_KEY` in the repository's `.env` file before launching. The file is loaded automatically and ignored by Git. With a key, `NALMAI_LLM_MODE=auto` selects the real Responses API adapter using model `gpt-5.6` and strict JSON schemas for student learning state, explanation risk, nudge generation, and implementation verification.
 
 ```powershell
 $env:OPENAI_API_KEY = "your-key"
@@ -52,7 +52,7 @@ $env:OPENAI_API_KEY = "your-key"
 To require OpenAI and fail instead of falling back:
 
 ```powershell
-$env:CLASSPULSE_LLM_MODE = "openai"
+$env:NALMAI_LLM_MODE = "openai"
 ```
 
 Without a key, the dashboard visibly reports **Deterministic demo fallback**. That offline provider implements the same validated Pydantic contracts so the demo and tests remain reproducible; it never claims its output came from GPT‑5.6.
@@ -84,7 +84,7 @@ the generated options in the call and never has to wait for the teacher to write
 
 For the most reliable local demonstration, open `/call` in two browser windows on the same
 computer. Camera/microphone access from a second
-physical device normally requires serving AhaLoop over HTTPS because browsers
+physical device normally requires serving Nalmai over HTTPS because browsers
 restrict media capture on non-secure network origins.
 
 The API key stays in `.env` on the server. The capture path requires
@@ -104,7 +104,7 @@ and do not establish that a nudge caused learning.
 - Event IDs are deduplicated, preventing one utterance from being applied twice.
 - Sentiment, explanation-risk, and nudge calls run off the event loop with an
   eight-second bound. Transcription has a configurable 30-second bound
-  (`CLASSPULSE_TRANSCRIPTION_TIMEOUT`). Failures emit `model_error` SSE events
+  (`NALMAI_TRANSCRIPTION_TIMEOUT`). Failures emit `model_error` SSE events
   or an explicit HTTP error; no successful model result is fabricated.
 - Legacy persisted mastery created under the former class-wide CCS rule is
   invalidated once because its individual states cannot be reconstructed.
@@ -145,7 +145,7 @@ poll correctness ─────────────────────
 
 - `app/stream.py`: validated fixture catalog and ordered asynchronous replay.
 - `app/ccs.py`: deterministic class-level signal features and bounded sigmoid fusion; CCS drives nudges but never changes every student's mastery.
-- `app/classbank.py`: time-aligned TalkBank CHAT parsing and AhaLoop conversion.
+- `app/classbank.py`: time-aligned TalkBank CHAT parsing and Nalmai conversion.
 - `app/bkt.py`: deterministic BKT with explicit and soft evidence.
 - `app/memory.py`: SQLite mastery repository with timestamped upserts and restart-safe loading.
 - `app/llm.py`: strict schemas, OpenAI Responses adapter, and labeled demo provider.
@@ -223,7 +223,7 @@ Run `py scripts/backtest_nudge_outcome.py` to replay two matched control/reframe
 | Sentiment and nudge generation | Real GPT‑5.6 when configured; visibly labeled deterministic fallback otherwise |
 | Keyword, latency, poll, CCS fusion | Real deterministic computation |
 | BKT mastery | Real deterministic probabilistic computation |
-| Mastery across restarts | SQLite persistence in `data/classpulse.db` |
+| Mastery across restarts | SQLite persistence in `data/nalmai.db` |
 | Browser updates | Real SSE stream |
 | Student chat typed during demo | Real input through the shared runtime queue |
 | Concurrent simulated classes | Real isolated runtime sessions |
@@ -233,7 +233,7 @@ Run `py scripts/backtest_nudge_outcome.py` to replay two matched control/reframe
 
 The repository includes the official TalkMoves public test splits under `data/real/talkmoves/`, licensed **CC BY-NC-SA 4.0** and preserved without content changes. TalkMoves contains human-transcribed, anonymized K–12 mathematics classroom language with teacher and student discourse-move annotations.
 
-AhaLoop validates:
+Nalmai validates:
 
 - **30,401** annotated utterance pairs;
 - **23,250** teacher pairs across seven teacher talk-move labels;
@@ -251,7 +251,7 @@ Source: [SumnerLab/TalkMoves](https://github.com/SumnerLab/TalkMoves). Dataset p
 
 ## Recorded live-class lessons with ClassBank
 
-AhaLoop can import authentic ClassBank TIMSS-Math CHAT transcripts and replay them through the same runtime at their recorded utterance timestamps. Imported teacher and student turns appear in the normal transcript and CCS pipeline with a visible `RECORDED CLASSBANK` marker; session metadata retains the corpus citation and optional local media path.
+Nalmai can import authentic ClassBank TIMSS-Math CHAT transcripts and replay them through the same runtime at their recorded utterance timestamps. Imported teacher and student turns appear in the normal transcript and CCS pipeline with a visible `RECORDED CLASSBANK` marker; session metadata retains the corpus citation and optional local media path.
 
 ClassBank requires registration, and its transcript/media server was not reachable from this build environment, so protected lessons are **not bundled or redistributed**. After downloading through your TalkBank account, run:
 
@@ -264,7 +264,7 @@ Restart the demo and imported lessons appear in the lesson selector. See [data/c
 ## Limitations
 
 - Fixtures replace real audio and platform integrations.
-- ClassBank imports use authentic recorded-lesson transcripts, but AhaLoop does not redistribute the protected media or yet transcribe its audio itself.
+- ClassBank imports use authentic recorded-lesson transcripts, but Nalmai does not redistribute the protected media or yet transcribe its audio itself.
 - Live typed messages have no trustworthy response-latency value, so their latency contribution is zero; language and subsequent poll signals still apply normally.
 - Initial CCS weights and BKT parameters are expert defaults. CCS has been backtested against nine diverse authored fixtures, but it is not trained on deployment data; expanded-set confirmed recall is only 0.269 and displayed evidence quality remains uncalibrated.
 - CCS observes language, latency, and polls, not tone, facial expression, or silence quality.
@@ -288,7 +288,7 @@ secure `wss://` signaling work from separate physical devices.
 1. Push this repository to GitHub.
 2. In [Render](https://dashboard.render.com/), choose **New > Blueprint** and
    connect the repository.
-3. Confirm the `ahaloop` service uses the **Free** instance.
+3. Confirm the `nalmai` service uses the **Free** instance.
 4. Enter `OPENAI_API_KEY` when Render requests the secret. Never commit `.env`.
 5. After deployment, open `https://<your-service>.onrender.com/call`.
 6. The teacher selects **Create teacher room** and sends the displayed room code
@@ -312,10 +312,10 @@ The production image serves the UI, API, SSE streams, and WebSocket signaling
 on port `8000` from one non-root Uvicorn worker:
 
 ```sh
-docker build -t ahaloop .
+docker build -t nalmai .
 docker run --rm -p 8000:8000 \
   -e OPENAI_API_KEY="your-key" \
-  ahaloop
+  nalmai
 ```
 
 Open `http://localhost:8000/call`. Do not put the API key in the image or task
@@ -334,7 +334,7 @@ For ECS, configure the task and load balancer as follows:
   process-local; multiple tasks can route two participants to different memory.
 - The bundled SQLite file is container-local and ephemeral. Mount EFS at
   `/app/data` if mastery must survive task replacement, or set
-  `CLASSPULSE_MEMORY_MODE=off` for an intentionally stateless demo.
+  `NALMAI_MEMORY_MODE=off` for an intentionally stateless demo.
 - Grant outbound HTTPS access so the task can reach OpenAI. No inbound port
   other than the load balancer listener should be public.
 
@@ -344,7 +344,7 @@ local databases, protected ClassBank downloads, and development artifacts.
 
 ## How I collaborated with Codex
 
-I used Codex as an implementation and evaluation partner, not as the source of the product idea or the final authority on educational claims. I supplied the AhaLoop goal, the staged task briefs, scope constraints, technology choices, and acceptance criteria. Codex inspected those instructions, implemented each bounded task, ran the application and tests, surfaced failures, and committed completed tasks separately so I could review the progression.
+I used Codex as an implementation and evaluation partner, not as the source of the product idea, the project name, or the final authority on educational claims. I supplied the Nalmai name and goal, the staged task briefs, scope constraints, technology choices, and acceptance criteria. Codex inspected those instructions, implemented each bounded task, ran the application and tests, surfaced failures, and committed completed tasks separately so I could review the progression.
 
 ### Prompts and task briefs I used
 
@@ -403,7 +403,7 @@ I retained responsibility for the product and evidence decisions:
 
 ### Tests and evaluation Codex helped construct
 
-Codex helped build the current 102-test suite, including:
+Codex helped build the current 103-test suite, including:
 
 - Fixture schema, event ordering, original timestamps, and asynchronous replay.
 - Calm, confused, bounded, early-warning, breadth, and time-decay CCS behavior.

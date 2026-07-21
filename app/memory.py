@@ -7,7 +7,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from threading import Lock
 
-DEFAULT_DB = Path(__file__).parents[1] / "data" / "classpulse.db"
+DEFAULT_DB = Path(__file__).parents[1] / "data" / "nalmai.db"
+LEGACY_DB = Path(__file__).parents[1] / "data" / "classpulse.db"
+
+
+def default_db_path() -> Path:
+    """Prefer Nalmai storage, but retain an existing pre-rename database."""
+    if DEFAULT_DB.exists() or not LEGACY_DB.exists():
+        return DEFAULT_DB
+    return LEGACY_DB
 
 
 class MasteryMemory:
@@ -66,6 +74,6 @@ class MasteryMemory:
 
 
 def build_memory() -> MasteryMemory | None:
-    if os.getenv("CLASSPULSE_MEMORY_MODE", "on").lower() == "off":
+    if os.getenv("NALMAI_MEMORY_MODE", os.getenv("CLASSPULSE_MEMORY_MODE", "on")).lower() == "off":
         return None
-    return MasteryMemory(os.getenv("CLASSPULSE_DB", str(DEFAULT_DB)))
+    return MasteryMemory(os.getenv("NALMAI_DB", os.getenv("CLASSPULSE_DB", str(default_db_path()))))

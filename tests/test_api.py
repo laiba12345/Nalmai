@@ -6,10 +6,10 @@ client = TestClient(app)
 def test_health_and_lesson_catalog():
     health = client.get("/api/health").json()
     assert health["status"] == "ok"
-    assert health["service"] == "AhaLoop"
+    assert health["service"] == "Nalmai"
     lessons = client.get("/api/classes").json()
     assert len(lessons) >= 3
-    assert {"forces-live", "fractions-live", "photosynthesis-live", "ahaloop-extended"}.issubset({lesson["id"] for lesson in lessons})
+    assert {"forces-live", "fractions-live", "photosynthesis-live", "nalmai-extended"}.issubset({lesson["id"] for lesson in lessons})
 
 def test_sse_stream_has_ordered_live_messages():
     with client.stream("GET", "/api/stream/fractions-live?speed=10000") as response:
@@ -22,8 +22,8 @@ def test_sse_stream_has_ordered_live_messages():
 def test_dashboard_is_served():
     response = client.get("/")
     assert response.status_code == 200
-    assert "AhaLoop" in response.text
-    assert "ClassPulse" not in response.text
+    assert "Nalmai" in response.text
+    assert "AhaLoop" not in response.text
     assert 'id="presentDemo"' in response.text
     assert 'id="demoGuide"' in response.text
     assert "GPT-5.6 analyzes language" in response.text

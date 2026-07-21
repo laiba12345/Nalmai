@@ -1,7 +1,7 @@
-# AGENTS.md — AhaLoop Build
+# AGENTS.md — Nalmai Build
 
 ## What this project is
-AhaLoop detects when students are getting confused during a live online
+Nalmai detects when students are getting confused during a live online
 class and nudges the teacher in real time on how to fix it, while tracking
 each student's evolving mastery per concept. Full design reference:
 the project design document in this repo — read it once for context,

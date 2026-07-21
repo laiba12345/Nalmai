@@ -25,11 +25,11 @@ from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).parents[1]
 PUBLIC = ROOT / "public"
-app = FastAPI(title="AhaLoop", version="1.0.0")
+app = FastAPI(title="Nalmai", version="1.0.0")
 app.mount("/static", StaticFiles(directory=PUBLIC), name="static")
 session_registry = SessionRegistry(build_provider, build_memory)
 transcriber = build_transcriber()
-TRANSCRIPTION_TIMEOUT = float(os.getenv("CLASSPULSE_TRANSCRIPTION_TIMEOUT", "30"))
+TRANSCRIPTION_TIMEOUT = float(os.getenv("NALMAI_TRANSCRIPTION_TIMEOUT", os.getenv("CLASSPULSE_TRANSCRIPTION_TIMEOUT", "30")))
 legacy_sessions: dict[str, str] = {}
 call_rooms = CallRoomRegistry(max_participants=2)
 
@@ -100,7 +100,7 @@ def _runtime_for_lesson(lesson_id: str, *, for_stream: bool = False) -> ClassRun
 @app.get("/api/health")
 def health():
     provider = build_provider()
-    return {"status": "ok", "service": "AhaLoop", "llm_mode": provider.mode, "model": "gpt-5.6" if provider.mode == "gpt-5.6" else None}
+    return {"status": "ok", "service": "Nalmai", "llm_mode": provider.mode, "model": "gpt-5.6" if provider.mode == "gpt-5.6" else None}
 
 
 @app.get("/api/classes")

@@ -1,6 +1,6 @@
 # CCS Backtest
 
-Generated from 9 authored AhaLoop fixtures using the production CCS path and deterministic demo sentiment provider.
+Generated from 9 authored Nalmai fixtures using the production CCS path and deterministic demo sentiment provider.
 
 | Fixture | Confirmed Precision | Confirmed Recall | Early Precision | Early Recall |
 |---|---:|---:|---:|---:|

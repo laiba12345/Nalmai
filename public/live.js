@@ -12,7 +12,7 @@ window.advanceDemo = function(step) {
     1: 'The lesson is live. Point to the transcript and the GPT-5.6 badge.',
     2: 'Student signals agree. Point to the CCS evidence—not just the score.',
     3: 'A concrete teaching move is ready. Click “Applied” to close the loop.',
-    4: 'AhaLoop found evidence in later teacher speech that the move was implemented.',
+    4: 'Nalmai found evidence in later teacher speech that the move was implemented.',
     5: 'The next poll improved. Show the observed outcome and finish the story.'
   };
   document.querySelector('#demoPrompt').textContent = prompts[step];
@@ -21,7 +21,7 @@ window.advanceDemo = function(step) {
 async function startPresentation() {
   presentationActive = true;
   document.body.classList.add('presentation-mode');
-  document.querySelector('#lessonSelect').value = 'ahaloop-extended';
+  document.querySelector('#lessonSelect').value = 'nalmai-extended';
   document.querySelector('#speedSelect').value = '1';
   window.scrollTo({top:0, behavior:'smooth'});
   window.advanceDemo(1);
@@ -64,7 +64,7 @@ async function decideNudge(nudgeId, decision, button) {
   if (!response.ok) throw new Error('Could not save nudge decision');
   button.parentElement.querySelectorAll('button').forEach(item => item.disabled = true);
   button.parentElement.insertAdjacentHTML('beforeend', `<small>Marked ${escapeHtml(decision)}</small>`);
-  if (decision === 'applied') document.querySelector('#demoPrompt').textContent = 'Applied. AhaLoop is now waiting for the next real learning check.';
+  if (decision === 'applied') document.querySelector('#demoPrompt').textContent = 'Applied. Nalmai is now waiting for the next real learning check.';
   await loadOutcomes();
 }
 

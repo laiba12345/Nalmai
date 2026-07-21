@@ -3,20 +3,20 @@ FROM python:3.13.5-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    CLASSPULSE_DB=/app/data/classpulse.db
+    NALMAI_DB=/app/data/nalmai.db
 
 WORKDIR /app
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt \
-    && groupadd --system ahaloop \
-    && useradd --system --gid ahaloop --home-dir /app ahaloop
+    && groupadd --system nalmai \
+    && useradd --system --gid nalmai --home-dir /app nalmai
 
-COPY --chown=ahaloop:ahaloop app ./app
-COPY --chown=ahaloop:ahaloop public ./public
-COPY --chown=ahaloop:ahaloop data ./data
+COPY --chown=nalmai:nalmai app ./app
+COPY --chown=nalmai:nalmai public ./public
+COPY --chown=nalmai:nalmai data ./data
 
-USER ahaloop
+USER nalmai
 
 EXPOSE 8000
 
