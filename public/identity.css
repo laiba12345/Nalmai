@@ -2,4 +2,8 @@
 .identity-controls label{font-size:8px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
 .identity-controls input{border:1px solid var(--line);border-radius:7px;padding:7px}
 .identity-controls small{font-size:8px;color:var(--muted);line-height:1.4}
+.meeting-page{overflow-y:auto;overflow-x:hidden}
+.meeting-shell{height:auto;min-height:calc(100vh - 68px);align-items:start}
+.meeting-stage{min-height:calc(100vh - 96px)}
+.teacher-insights{overflow:visible;max-height:none}
 @media(max-width:750px){.identity-controls{grid-template-columns:1fr 1fr}.identity-controls small{grid-column:1/-1}.call-controls{flex-wrap:wrap}}

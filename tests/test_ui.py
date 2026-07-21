@@ -24,6 +24,7 @@ def test_live_call_has_identity_media_and_saved_performance_controls():
     html = (root / "public/call.html").read_text(encoding="utf-8")
     call_js = (root / "public/call.js").read_text(encoding="utf-8")
     meeting_js = (root / "public/meeting.js").read_text(encoding="utf-8")
+    identity_css = (root / "public/identity.css").read_text(encoding="utf-8")
     for control in ("participantName", "participantId", "toggleMic", "toggleCamera", "performanceCard"):
         assert f'id="{control}"' in html
     assert "track.enabled=!track.enabled" in call_js
@@ -34,6 +35,8 @@ def test_live_call_has_identity_media_and_saved_performance_controls():
     assert "TRANSCRIPTION_WINDOW_SECONDS=10" in meeting_js
     assert "TRANSCRIPTION_WINDOW_SECONDS*1000" in meeting_js
     assert "/api/performance/teacher/" in meeting_js
+    assert ".meeting-page{overflow-y:auto" in identity_css
+    assert ".meeting-shell{height:auto" in identity_css
 
 def test_dashboard_has_all_live_product_surfaces():
     root = Path(__file__).parents[1]
